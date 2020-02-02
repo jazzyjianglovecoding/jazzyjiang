@@ -1,0 +1,291 @@
+In this chapter, a more realistic optimisation model will be considered start with changing initial subjective risk factor $\sigma$ to a more empirical one using historical data obtained in Bloomberg to estimate future volatilities where exponentially weighted moving average(EWMA) model and GARCH(1,1) model will be brought in. Furthermore, many other constraints like transaction cost, margin requirements and bounds on positions were neglected. Therefore, more reasonable volatility models and portfolio constraints will be added in the following discussion. Main references of this part are the paper of S.P. Uryasev \cite{10}, classical book \textit{Options, Futures, and Other Derivatives} written by John C. Hull \cite{12}, the thesis of Michael W. Brandt \cite{13} and Roger W. Lee \cite{14}.
+\section{Models for Risk Factor}
+In the geometric Brownian motion model $dS_t=\mu S_tdt+\sigma S_tdW_t$, two parameters $\mu$ and $\sigma$ represent expected return within a short time and stock price volatility respectively. Volatility can be seen as an indicator of uncertainty of future movements of stock price.  When volatility goes up, the influence for option holder is greater than stock holder as outcome of option tend to benefit from price changes on one side rather than offset each other like stock.
+On the other hand, from the perspective of investors, it always requires higher expected return for higher risks which suggest $\mu$ is dependent on $\sigma$. However, $\sigma$ is way more significant than $\mu$ as it directly affects the pricing of many derivatives especially option which can be exemplified by famous Black-Scholes formula(independent of $\mu$). Thus only methods of estimating stock price volatility $\sigma$ will be introduced next. Typical volatility values for stock price is always between 15$\%$ and 60$\%$. 
+\subsection{Estimation via Standard Deviation}
+From the methodology part, we have derived that the GBM indicates:
+\begin{equation}
+\ln{S_T}-\ln{S_0}\sim\phi[(\mu-\sigma^2/2)T,\sigma^2T]
+\Rightarrow
+\ln{\frac{S_T}{S_0}}\sim\phi[(\mu-\sigma^2/2)T,\sigma^2T]
+\end{equation}
+where $S_T$ and $S_0$ represents the sock price at time $T$ and start, $\phi(p,q)$ is a normal distribution with expectation $p$ and variance $q$. To estimate the volatility empirically, $m+1$ observations of stock price are observed over a period with fixed intervals(e.g., per day, week, or month). Then define $S_k$ as stock price at the end of $k$-th interval, where $k=0,\cdots,m$ and $\tau$ is the length of time period with years as measurement. Set $v_k=\ln{(S_k/S_{k-1})}$ which could be regarded as return, then $v_i$ should satisfy the condition similarly to 5.1, i.e., $v_k\sim\phi[(\mu-\sigma^2/2)\tau,\sigma^2\tau]$. Let $s$ be the standard deviation of $v_k$,  then $\hat{s}$ being the approximation of $s$ is always estimated by:
+\begin{equation}\label{equation 5.2}
+\hat{s}=\sqrt{\frac{1}{m-1}\sum_{k=1}^{m}(v_k-\bar{v})^2}
+\Leftrightarrow
+\hat{s}=\sqrt{\frac{1}{m-1}\sum_{k=1}^{m}v_k^2-\frac{1}{m(m-1)}(v)^2}
+\end{equation}
+where $\bar{v}$ is the mean and $v$ is the sum of $v_k$. As $v_k\sim\phi[(\mu-\sigma^2/2)\tau,\sigma^2\tau]$, it is evident that $s=\sigma\sqrt{\tau}$ and $\hat{s}$ is estimation value of $\sigma\sqrt{\tau}$. Therefore, $\sigma$ itself can be estimated by $\hat{\sigma}=\hat{s}/\sqrt{\tau}$. For this estimation technique, it is quite trivial to choose the right observations since more data result in precision but less efficient because of irrelevance of those old data. Solution 1 is to use the data picked up from the most recent 90 to 180 days. Alternatively, set $n$ the same number as the time the volatility applied is another way accepted through common practice. Notice that all analysis mentioned above suppose no dividends paid by the company. Actually, one can adjust to accommodate dividend-paying stock just by setting $v_k=\ln{[(S_k+D)/S_{k-1}]}$ with D representing dividend amounts during ex-dividend interval. Nevertheless, considering tax of dividend also affect the calculation of return, it is better to delete those data in the period of dividend payment. 
+\subsection{Other Static Estimator}\label{Section 5.1.2}
+Firstly, we have some static statistical measures of volatility which differs the dynamic GARCH and EWMA models. It is less realistic but still have edge compared to traditional standard deviation estimator described by $\hat{\sigma}_{T}$. Denote $c_t$, $o_t$, $h_t$ and $l_t$ as normalised close price, open price, high price and low price for stock at day $t$. Classical variance estimator then can be written in the form of these notations as:
+\begin{equation}
+\hat{\sigma}_C^2=\frac{1}{m-1}\sum_{k=1}^{m}[(o_k+c_k)-\frac{1}{m}(o_k+c_k)]^2
+\end{equation} 
+The Parkinson's Historical Volatility, or High Low Range Volatility, developed by physicist Michael Parkinson in 1980, can be written as:
+\squeezeupu
+\begin{equation}
+\hat{\sigma}_P^2=\frac{1}{4\ln{2}}\sum_{k=1}^{m}(h_k-l_k)^2
+\end{equation} 
+This estimator also helps to better understand market dynamic. Unlike standard deviation and Parkinson estimator, Garman and Klass provided a superior estimator using three price index which are high, low and close price and accounts for opening jumps(effected by information arrived during closed time):
+\squeezeupu
+\begin{equation}
+\hat{\sigma}_{GK}^2=\frac{0.511}{m}\sum_{k=1}^{m}(h_k-l_k)^2-\frac{0.019}{m}\sum_{k=1}^{m}[c_k(h_k+l_k)-2h_kl_k]-\frac{0.511}{m}\sum_{k=1}^{m}c_k^2
+\end{equation} 
+where both estimators above demand the process follow GBM with zero drift which can be satisfied in most condition as expected return is relatively small compared to volatility. Nevertheless, there are still periods during which the trend of asset perform strongly, making drift greatly connected to volatility. This may lead to overestimation. For this reason, Roger and Satchell developed an new estimator which allows for nonzero drift but excludes opening jump:
+\begin{equation}
+\hat{\sigma}_{RS}^2=\frac{1}{m}\sum_{k=1}^{m}[h_k(h_k-c_k)+l_k(l_k-c_k)]
+\end{equation} 
+Tactfully, Yang and Zhang in 2002 united classical and Rogers-Satchell estimator which shows the properties of unbiasedness and independence of drift and opening gaps:
+\begin{equation}
+\hat{\sigma}_{YZ}^2=\hat{\sigma}_{O}^2+k\hat{\sigma}_{C}^2+(1-k)\hat{\sigma}_{RS}^2
+\end{equation} 
+where $k=0.34/(1+\frac{m+1}{m-1})$ and $\hat{\sigma}_{O}^2=\frac{1}{m-1}(o_k-\bar{o})^2$. Define efficiency of one estimator as $E=VAR(\hat{\sigma}^2)/VAR(\hat{\sigma}_C^2)$, then $E=1+1/k$ for Yang-Zhang estimator. Notice that $k$ obtain the minimum value when $n=2$, thus efficiency can reach the peak value around 14 which means using 2-day data provides the same precision as using three-week data via classical estimator. Other estimators like integrated volatility and realised volatility which imports high frequency data also demonstrates superior accuracy. 
+\subsection{Estimation via EWMA Model}
+Both EWMA and GARCH model are dynamic which volatility is no longer calculated as a constant. From  \hyperref[Section 5.1.2]{Section 5.1.2}, a simple method utilising historical data to estimate volatility has been introduced. Now we assume $\sigma_n$ is the volatility estimated from the view of $(n-1)$-th day, $\sigma_n^2$ is called variance rate, variable $v_k$ is still defined by continuously compounded return as $v_k=\ln{(S_k/S_{k-1})}$. Similarly to \hyperref[equation 5.2]{equation 5.2}, unbiased estimate of variance rate $\hat{\sigma_n^2}=\frac{1}{m-1}\sum_{k=1}^{m}(v_{n-k}-\bar{v})^2$, where $\bar{v}=1/m\sum_{k=1}^{m}v_{n-k}$. For the convenience of monitoring daily volatility, some changes are made. Firstly, unbiased estimate is replaced by biased estimate, i.e. $\frac{1}{(m-1)}$ changes to $\frac{1}{m}$ in the expression of variance rate. Secondly, $\bar{v}$ is set to be zero as it has little influence on variance rate. Finally, as we are more interested in the evolution of relative return of $S_k$, $v_k$ can be redefined: $v_k=\frac{S_k-S_{k-1}}{S_{k-1}}\sim\bigtriangledown\ln{S_k}=\ln{\frac{S_k}{S_{k-1}}}$. All three changes have simplified equation of variance rate to:
+\begin{equation}
+\hat{\sigma}_n^2=\frac{1}{m}\sum_{k=1}^{m}v_{n-k}^2
+\end{equation}
+where every return $v_{n-1}^2,\cdots,v_{n-m}^2$ has the same weight $1/m$. However, it is more sensible to give heavier weights to recent data which again transforms 5.3 to: 
+\begin{equation}\label{5.9}
+\hat{\sigma}_n^2=\sum_{k=1}^{m}\alpha_kv_{n-k}^2
+\end{equation}
+where $\alpha_k$ is the weight corresponding to the observations before day $k$, $\alpha_k>0$, $\alpha_i<\alpha_j$ for $i>j$ and $\sum_{k=1}^{m}\alpha_k=1$. Besides, take mean reversion property of market variance for long-term period, we bring in long-run average variance rate $V_A$ and assign corresponding weight $\kappa$ to it which again give us a new form for the model:
+\begin{equation}\label{5.10}
+\hat{\sigma}_n^2=\kappa V_A+\sum_{k=1}^{m}\alpha_kv_{n-k}^2
+\end{equation}
+where $\kappa+\sum_{k=1}^{m}\alpha_k=1$. This model is first introduced by Engle \cite{15} known as ARCH(m) model.
+As for EWMA model, it is a special form of formula 5.4 where $\alpha_{k}$ decrease exponentially by $\lambda$ when we move back over time. In other words,  $\alpha_{k+1}=\lambda\alpha_{k}$. Given above special assumption, variance rate formula has been simplified once again:
+\begin{equation}\label{5.11}
+\hat{\sigma}_n^2=\lambda\sigma_{n-1}^2+(1-\lambda)v_{n-1}^2
+\end{equation}
+where $\lambda\in(0,1)$. In this way, estimate of volatility of a variable for day $n$ is now fully decided by the estimate and new defined return calculated before that day. For the proof of that $\alpha_k$ decrease in exponential speed, iterative analysis can be adopted to obtain the final formula: 
+\begin{equation}\label{5.12}
+\hat{\sigma}_n^2=(1-\lambda)\sum_{k=1}^m\lambda^{k-1}v_{n-k}^2+\lambda^m\sigma_{n-m}^2
+\end{equation} 
+As $\lambda$ is between 0 and 1, $\lambda^m\sigma_{n-m}^2$ can be small enough to be ignored as long as $m$ is big enough. For  equations \hyperref[5.11]{5.11} and \hyperref[5.9]{5.9} equivalent to each other, we can set  $\alpha_k=(1-\lambda)\lambda^{k-1}$ which satisfy the exponential decrease condition. One conspicuous merit of using EWMA model instead of historical data is that little space will be used to store data as only latest estimate of variance rate and observation of market price need be acquired while the old one can be deleted. Its inventive is to track volatility movement and the $\lambda$ plays a decisive role in response of estimate of daily volatility caused by recent daily percentage change. A large $\lambda$ will lead to low sensitivity of estimate to daily percentage change and vice versa. According to the RiskMetrics database which was firstly established by  J.P. Morgan in 1994, $\lambda=0.94$ is chosen to use in EWMA which fits the real situation very well. 
+\subsection{Estimation and Forecast via GARCH(1,1) Model}
+GARCH(1,1) model was brought by Bollerslev \cite{16} in 1986 based on ARCH model mentioned before. The difference between GARCH(1,1) and EWMA from the aspect of mathematical expression is just like equation \hyperref[5.9]{5.9} and \hyperref[5.10]{5.10} where $\sigma_n^2$ is also dependent on long-term average variance:
+\begin{equation}
+\hat{\sigma}_n^2=\kappa V_A+\alpha\sigma_{n-1}^2+\delta v_{n-1}^2\quad
+\end{equation} 
+with $\kappa+\alpha+\delta=1$. It is obvious that EWMA is a special case of GARCH(1,1) with $\kappa=0$, $\alpha=1-\lambda$ and $\delta=\lambda$. For GARCH(p,q) model, p and q respectively means the order of terms $\sigma^2$ and $v^2$. Thus GARCH(1,1) indicates that the estimate is based on the latest observation of $\sigma^2$ and $v^2$ which is also the most widely used one in GARCH family. For simplification, another form can be written as:
+\begin{equation}
+\hat{\sigma}_n^2=\omega+\alpha\sigma_{n-1}^2+\delta v_{n-1}^2
+\end{equation} 
+This form is more advantageous for estimating parameters $\omega$, $\alpha$ and $\delta$. Afterwards, $\lambda$ can be calculated as $\lambda=1-\alpha-\delta$ and $V_A=\omega/\lambda$. Similarly, apply iterative computations twice to the equation:
+\begin{equation}
+\hat{\sigma}_n^2=\omega+\delta\omega+\delta^2\omega+\alpha v_{n-1}^2+\alpha\delta v_{n-2}^2+\alpha\delta^2v_{n-3}^2+\delta^3\hat{\sigma}_{n-3}^2
+\end{equation} 
+Keeping iterative and we will see the weight assigned to $v_{n-k}^2$ is $\alpha\delta^{k-1}$ which can be interpreted as decay rate similar to $\lambda$ in EWMA model. This parameter decides the importance degree of observations of return. For instance, if $\delta=0.8$, then $v_{n-2}^2$ is $80\%$ significant as $v_{n-1}^2$; $v_{n-3}^2$ is $64\%$ significant as $v_{n-1}^2$, etc.. On the other hand, GARCH(1,1) model suppose that variance, like stock price to some extent, tend to move to the long-run average variance rate level $V_A$ over time. Based on $\lambda=1-\alpha-\delta$, $V_A=\omega/\lambda$, and then set $\zeta=\sqrt{2}\alpha$, assume $v_{n-1}\sim\mathcal{N}(0,\sigma_{n-1}^2)$ and $V=\hat{\sigma}_{n-1^2}$ then we can prove GARCH(1,1) is equivalent to:
+\begin{equation}
+dV=\lambda(V_A-V)dt+\zeta Vdz
+\end{equation} 
+where z is a Wiener process. The stochastic process shown above implies exactly what is called mean-reverting property which is the advantage of GARCH(1,1) model compared to EWMA model. Now the model has been determined, a common method called \textit{maximum likelihood estimation}(MLE) will be used to estimate parameters $\omega$, $\alpha$ and $\delta$. Just as its name implies, choosing fitting parameters that maximise the likelihood of the data occurring is the key. It starts with finding a mathematical expression known as \textit{Likelihood Function} which is always written as joint probability function $L(\theta)$ of observed samples $x_1,\cdots,x_n$ where $\theta$ represents all parameters. Then take the natural logarithm of the likelihood function for convenience. For many models, a maximum likelihood estimator can be calculated as an explicit function of observed data by solving equations after taking derivatives of log-likelihood function w.r.t. each $x_i$ and set it to zero. For GARCH(1,1) model, assume observed data $v_1,\cdots,v_m$ and  probability distribution of $v_k$ obey normal distribution with $g_k=\hat{\sigma}_k^2$ as variance. Define the likelihood of $v_k$ as the probability function for a random variable $X$ when $X=v_k$:
+\begin{equation}
+\frac{1}{\sqrt{2\pi g_k}}\exp({\frac{-v_k^2}{2g_k}}) \nonumber
+\end{equation} 
+Then, likelihood function $L(\theta)$ is just joint probability function with $m$ observations occurring in order$v_1,\cdots,v_m$ 
+\begin{equation}
+L(\theta)=\prod\limits_{k=1}^{m}[\frac{1}{\sqrt{2\pi g_k}}\exp({\frac{-v_k^2}{2g_k}})] 
+\end{equation} 
+Maximum $L(\theta)$ is equivalent to maximum its log form without constant term which is:
+\begin{equation}
+\sum_{k=1}^{m}[-\ln{g_k}-\frac{v_k^2}{g_k}] 
+\end{equation} 
+Then the parameters could be found via iterative search method which will not be elaborated in this thesis. When it comes to EWMA model, estimation is simpler as there are just two parameters $\alpha$ and $\delta$ with condition that their sum equals to 1. 
+Now that the GARCH(1,1) model has been set with known parameters, the next problem of how to forecast future volatility comes to mind spontaneously. From GARCH model, substitute constraint  $\kappa+\alpha+\delta=1$ we have:
+\squeezeupu
+\begin{equation}
+\sigma_n^2=(1-\alpha-\delta)V_A+\alpha\sigma_{n-1}^2+\delta v_{n-1}^2 \nonumber
+\end{equation} 
+\squeezeupu
+by rearranging the formula, we obtain:
+\begin{equation}
+\sigma_n^2-V_A=\alpha(v_{n-1}^2-V_A)+\delta(\sigma_{n-1}^2-V_A) \nonumber
+\end{equation} 
+then on day $n+t$ in the future, we derive:
+\squeezeupu
+\begin{equation}
+\sigma_{n+t}^2-V_A=\alpha(v_{n+t-1}^2-V_A)+\delta(\sigma_{n+t-1}^2-V_A) \nonumber
+\end{equation} 
+As we know, the expectation of $v_{n+t-1}^2$ equals to $\sigma_{n+t-1}^2$ as $v_{t}=\sigma_{t}\varepsilon_{t}$ where $\varepsilon_{t}$ is a white noise. Thus taking expectaion on both sides gives us:
+\squeezeupu
+\begin{equation}
+\mathbb{E}[\sigma_{n+t}^2-V_A]=(\alpha+\delta)\mathbb{E}[\sigma_{n+t-1}^2-V_A] \nonumber
+\end{equation} 
+Again by iteration, we finally have:
+\squeezeupu
+\begin{equation}
+\mathbb{E}[\sigma_{n+t}^2]=V_A+(\alpha+\delta)^t(\sigma_n^2-V_A)
+\end{equation} 
+The equation provides us the volatility on day $n+t$ based on the data available from the end of day $n-1$. When $t$ increases, it is obvious that expected value of variance rate will approach long-term variance which again proved mean-reverting property. As for EWMA model, future variance rate will always remain the same as current one because $\alpha+\delta=1$. 
+GARCH models is a more appropriate model to help describing financial markets where volatility actually changes through time(less volatile during calm and steady economic growth period and more volatile in financial crisis or world events). 
+\subsection{Implied Volatility}
+On the contrary to historical volatility and dynamic models using asset prices in the past, implied volatility looks ahead directly which is always interpreted as the markets's expectation for future volatility of the underlying asset. It is also a dynamic value determined by option price in the market(decided by supply and demand). Recall Risk Neutral Valuation class, the Black and Scholes price of a call option after solving the PDE is given by:
+\begin{equation}
+C(t,S_t)=S_t\mathcal{N}(d_t^+)-Ke^{-r(T-t)}\mathcal{N}(d_t^-)
+\end{equation} 
+where $S_t$ is the stock price at time $t$, $\mathcal{N}$ is the cumulative distribution function of normal-(0,1) random variable, $K$ is the strike price, $r$ is the risk free interest rate and 
+\begin{equation}
+d_t^{+/-}=\frac{\ln(S_t/K)+(r\pm\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}} \nonumber
+\end{equation} 
+Let $f(S_t,K,\sigma,r,t,T)=C$, then one observed option value $C$ from the market could infer a value of $\sigma$ on condition that $t$, $T$, $S_t$, $K$ and $r$ are known. In other words, the implied volatility can be obtained by taking the market price of the option, putting it into Black-Scholes formula and then back solving for the figure of the volatility. 
+Denote implied volatility as $\sigma_I(K,T)$, then various approaches can be implemented to calculate it. One simple method is iterative search which starts by a hypothetic implied volatility and ends with a corresponding option price. Since call options are increasing function, thus if obtained option price is lower than market price, we can adjust the assumption of option price being higher and vice versa. Repeat this procedure until the very volatility guessed out which results in the exact market option price. Other algorithms can be used to solve numerically for $\sigma_I(K,T)$ include bisection method and Newton-Raphson method. The former one is easier to implement as it does not need numerical derivatives. After calculation of $\sigma_I(K,T)$, plotting strike price with its corresponding implied volatility gives us a curve named "volatility smile", or "volatility skew". The curve shows us volatility go down when strike price increases. One explanation of this circumstance is leverage. Decrease of a company's stock price leads to increase of leverage which causes more risk of the equity. Generally, implied volatility being higher than historical volatility suggests that market option prices may be overestimated and vice versa. On the other hand, if implied volatility increases after a deal has been placed, option owner will benefit from it while option seller will suffer losses from the change. 
+\subsection{Numerical Analysis for Volatility}
+As GARCH(1,1) model is the supreme model compared to EWMA model and other historical estimation models for volatility estimation and forecast, its numerical procedures via MATLAB will mainly be elaborated in this section. Other softwares like R and EVIEWS have powerful GARCH model analysis tool as well. Firstly, for effectiveness and stability, we take around 300 days of AMAZON stock price before 18/04/2013 as input for GARCH fit. Then convert prices to percentage returns using $price2ret$ command in econometrics toolbox. We assume return $y_t$ fit auto-regressive model with lag 1, i.e., plus GARCH(1,1) model ,we derive:
+\begin{equation}
+  \begin{cases}
+y_t=c+\phi_1y_{t-1}+v_t  \quad with \quad v_t=\sigma_t\varepsilon_t \\
+ \sigma_t^2=\omega+\alpha\sigma_{t-1}^2+\delta v_{t-1}^2 \\
+  \end{cases}
+\end{equation}
+where $\varepsilon_t$ is an independent and identically distributed standardised Gaussian process known as white noise. Next specify above models in autoregressive integrated moving average (ARIMA) model(ARIMA(1,0,0) model). Then fit the model to the return series $y$ via command $estimate$. The results are presented as follows:
+\begin{table}[h!]
+\centering
+\caption{ARIMA(1,0,0) Model with Gaussian and t Conditional Probability Distribution}
+\begin{tabular}{ |p{2cm}|p{1.3cm}|p{1.5cm}|p{1.5cm}|p{1.3cm}|p{1.5cm}|p{1.5cm}|}
+ \hline
+Distribution& \multicolumn{3}{|c|}{Gaussian Distribution}&\multicolumn{3}{|c|}{Student t Distribution} \\
+ \hline
+Parameter&Value1&Standard Error1&t Statistic1&Value2&Standard Error2&t Statistic2\\
+ \hline
+Constant&0.118&0.084&1.409&0.096&0.085&1.128\\
+AR\{1\}&0.009&0.060&0.149&-0.0008&0.060&-0.140\\
+ \hline
+\end{tabular}
+\end{table}
+\begin{table}[h!]
+\centering
+\caption{GARCH(1,1) Model with Gaussian and t Conditional Probability Distribution}
+\begin{tabular}{ |p{2cm}|p{1.3cm}|p{1.5cm}|p{1.5cm}|p{1.3cm}|p{1.5cm}|p{1.5cm}|}
+ \hline
+Distribution& \multicolumn{3}{|c|}{Gaussian Distribution}&\multicolumn{3}{|c|}{Student t Distribution} \\
+ \hline
+Parameter&Value1&Standard Error1&t Statistic1&Value2&Standard Error2&t Statistic2\\
+ \hline
+Constant&1.368&0.538&2.542&1.644&1.103&1.490\\
+GARCH\{1\}&0.279&0.220&1.266&0.223&0.442&0.504\\
+ARCH{1}&0.242&0.080&3.025&0.163&0.104&-1.559\\
+ \hline
+\end{tabular}
+\end{table}
+\\
+The estimations display shown above give five parameters in total and their corresponding standard errors. Use Gaussian distribution as example, the fitted model then becomes:
+\begin{equation}
+  \begin{cases}
+y_t=0.118+0.009y_{t-1}+v_t  \\
+ \sigma_t^2=1.368+0.279\sigma_{t-1}^2+0.242v_{t-1}^2 \\
+  \end{cases}\nonumber
+\end{equation}
+The standard error(small) and 2 t statistics for parameters($\geq2$) of the model are within reasonable region which illustrates that the fitting part is not bad. t statistic for $\alpha$ means it is not statistically significant than $w$ and $\delta$. Refer the log-likelihood function value we have its output -582.259. Also infer and plot conditional variances(transfer it to standard deviation) and standardised residuals we have Figure 5.1. Moreover, standard deviation is around 0.2 on average. 
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.37]{VarianceandSR.png}
+  \caption{Standard Deviation over 300 Days and its Residuales \label{fig:scaled_diss}}
+\end{figure}
+From the figure of standard deviation, we can see 4 volatility clustering segments which corresponds to increased volatility observed from the original return series. 
+\begin{figure}[b!]
+  \centering
+  \includegraphics[scale=0.38]{Forecastsd.png}
+  \caption{Simulation and Forecast for Volatility with GARCH Model \label{fig:scaled_diss}}
+\end{figure}
+The standardised residuals have many large values than expected suggests other distribution like t distribution might be more appropriate for the innovation distribution. Then compare two models via the Akaike information criterion (AIC) and Bayesian information criterion (BIC). The smaller the criterion is, the better the model is. The output for AIC and BIC shows both information criteria prefer the model with Gaussian distribution. Thus, we choose parameters obtained from Gaussian distribution for GARCH(1,1) model forecast. After specifying parameters for GARCH(1,1) model, we firstly simulate 100 observations, then forecast the conditional variance over 30-day horizon with and without simulated data as sample innovations. After taking standard deviation from variance we can plot the forecasts as shown in Figure 5.2. After fluctuating, standard deviation as volatility finally converges to a constant 0.17 in the long-term future which verified the mean reversion once more. From another historical estimator of volatility, on day 18/04/2013, the volatility of AMAZON equity price using 50 days' historical data(see \hyperref[Table 7.1]{Table 7.1} in appendix) are extracted from Bloomberg using method mentioned before:
+\begin{table}[h!]
+\centering
+\caption{Portfolio Constitution with More Constraints}
+\begin{tabular}{ |p{1.9cm}||p{1.8cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|}
+ \hline
+Estimator & Classical Model &Classical Model with Drift&Parkinson Model&Garman-Klass Model&Roger-Satchell Model\\
+\hline
+Volatility&0.2471&0.2472&0.2281&0.2333&0.2356\\
+ \hline
+\end{tabular}
+\end{table}
+From the table, historical volatility utilising various method is around 0.23 while implied volatility calculated by Bloomberg's algorithm can be found in appendix is higher than historical volatility which reaches to 0.27 on average during the intending 30 days. It is a truth that implied volatility is always higher than historical one as options exists and traded as a premium form in the market most of the time. In summary, investor can choose among diversified volatility form for Monto Carlo simulation based on empirical results which should be more accurate than before. 
+
+\section{Portfolio Constraints}
+Having issued the irrationality of subjective constant volatility used in GBM for stock price simulation, now we can turn the focus to the practicability of optimisation part. Though budget constraint and payoff constraint were added in previous optimisation constraint section, many other elements like transaction cost, bounds for trading amounts or short position and different interest rated for lending and borrowing are neglected which actually effect the optimisation results more or less. Paper of S.P. Uryasev \cite{10} for mathematical expression of constraints and book of John C. Hull \cite{12} for real market situation are mainly referenced in the next few sections. 
+\subsection{Transaction Costs}
+In the Markowitz's theory, it is assumed that there is no transaction cost. However, in real market which is incomplete, transaction cost is not small enough to be ignored for optimisation. Denote $c_k$ as the transaction cost for instrument $k$, then it is always assumed as a linear form which is proportional to traded amount.(For non-convex transaction cost, see Konno and Wijayanayake \cite{17}. Transaction for cash account $c_{cash}=0$. Set proportion of transaction cost for asset $k$ as $\eta_k$ and initial portfolio as $\textbf{z}^0=(z_1^0,\cdots,z_n^0)$, then transaction costs can be written as:
+\begin{equation}
+\sum_{k=1}^nc_k=\sum_{k=1}^n\eta_k|z_k-z_k^0|
+\end{equation} 
+To remove absolute value sign, we suppose $x_k^+$ and $x_k^-$ as amounts of asset bought and sold with $x_k^+=[z_k-z_k^0]^+$ and $x_k^-=[z_k^0-z_k]^+$. Therefore, the target function in optimisation problems should add this transaction cost and CVaR optimisation becomes:
+\begin{align} 
+minimise \quad \alpha+(q(1-\beta))^{-1}\sum_{k=1}^{q}\mu_k+\sum_{k=1}^n\eta_k|z_k| \quad(CVaR)\nonumber 
+\\ subject \enspace to \quad \mu_k\geq0,\enspace x_k^+\geq0, \enspace x_k^-\geq0,\enspace z^Ty_k+\alpha+\mu_k\geq0\nonumber
+\\z_k-z_k^0=x_k^+-x_k^-, \quad k=1,\cdots,n
+\end{align}
+In fact, the linear transaction costs defined will rise the ask-price of an option by a multiple of $(1+\eta_k)$ and reduce the bid-price by a multiple of $(1-\eta_k)$. Transaction costs for option trading are mainly composed of commissions and margins. Different types of brokers charges differently. As we consider retail investor(individual investor), commissions vary greatly among brokers. Discount brokers like Charles Schwab and TD Waterhouse charge reduced fees without investment advice while full-service broker raging from Merril Lynch to Morgan Stanley Dean Witter provide all kinds of services. Yet the actual fee is always calculated by the same two parts which are a fixed cost plus a proportion of trading amount. \hyperref[Table 5.4]{Table 5.4} gives us a glance of typical commission offer as a discount broker:
+\begin{table}[h!]\label{5.4}
+\centering
+\begin{tabular}{||c c ||} 
+ \hline
+Transaction Size(dollar)  & Commission Charged \\ [0.5ex] 
+ \hline\hline
+ $<$2,500  &20+2\% of trading amount\\ 
+2,500 to 10,000  &45+1\% of trading amount\\
+$>$10,000 &120+0.25\% of trading amount\\
+  [0.5ex] 
+ \hline
+\end{tabular}
+\caption{Typical Commission Offer}
+\label{table:1}
+\end{table}
+When an offsetting trade is made to close option position, commission fee need to be paid again. When the option is executed, another $1\%$ or $2\%$ of stock's value would be paid as commission. Thus selling the option may save some exercise expenses when stock price is high. The other part of transaction cost is related to leverage which means one can borrow up to $50\%$ of the price from the broker when stocks are purchased. When price of the stock move against dramatically so that the load over-exceed $50\%$ of stock's current value, a "margin call" will be sent for cash deposition. The position will be compulsively closed if failed to meet the call. As for option purchase, only those options with maturities greater than 9 months can be bought on margin with $25\%$ of option value. A certain amount of margin depends on different trading environment is required in the account to maintain funds and avoid default. 
+\subsection{Bounds on Positions}
+The amounts that you can buy or sell at bid/ask price are often limited during a trading period. One has to take worse price when trading larger amounts and as traded quantities go up, price shift in an unfavourable direction. This nonlinearity between the unit price and traded quantity refer to illiquidity which is also a source of the incompleteness of real-life market. Thus, we consider position changes can be bounded by $\bar{x}_k^+$ and $\bar{x}_k^-$. Besides, positions themselves may be bounded by $\underline{z_k}$ and $\bar{z_k}$(as American options can be in a short position, there is no need to add positive bounds on portfolio). Mathematically, we have 
+\begin{equation}
+x_K^+\leq\bar{x}_k^+, x_K^-\leq\bar{x}_k^- \quad and \quad\underline{z_k}\leq z_k\leq\bar{z_k}
+\end{equation}
+For example, Chicago Board Options Exchange always set position limits of option contracts which gives the maximum quantity of contracts one can hold. Short puts and long calls, short calls and long puts are regarded on the same side under this circumstance. In addition, exercise limit that equals to position limit in most cases is defined as the maximum number of contracts that can be exercised in any consecutive five trading days. Options with different market size have different limits. For those options with largest market size and trading frequency, position limits are always 250,000. Smaller ones have position limits 200,000, 75,000, 50,000, or 25,000. Bounds on positions are set mainly for the purpose of preventing market unduly fluctuations caused by an individual investor. 
+\subsection{Other Changes for Optimisation}
+Last but not least, banks must earn spread from the money it lends out(loan) and takes in(deposit). For the most part, interest rates are free to be determined by banks with competition, market levels and Fed policies as references. With regard to the deposit money, risk-free interest rate is always taken where return on short-term government bonds is normally used as a fitting proxy. Lending interest rate is more complicated with lots of different situations. Thus average loan interest rate that year will be taken in our case later. Now we have new problem as:
+\begin{align} 
+minimise \quad \alpha+(q(1-\beta))^{-1}\sum_{k=1}^{q}\mu_k+\sum_{k=1}^n\eta_k|z_k| \quad(CVaR)\nonumber 
+\\ subject \enspace to \quad \mu_k\geq0,\enspace 0\leq x_k^+\leq\bar{x}_k^+, \enspace 0\leq x_k^-\leq\bar{x}_k^-,\enspace z^Ty_k+\alpha+\mu_k\geq0\nonumber
+\\\underline{z_k}\leq z_k\leq\bar{z_k},\quad z_k-z_k^0=x_k^+-x_k^-, \quad k=1,\cdots,n
+\end{align}
+where decision vector $\textbf{z}$ now have $n=42$ elements in total with 38 option long and short positions, 2 stock long and short positions, 2 interest rates borrowing and lending positions. 
+\subsection{Numerical Analysis of New Portfolio Constraints}
+Compared to original optimisation, we have 42 asset forms now which include 19 options both for short and long position, 1 stock for short and long position and 1 cash account both for lending and borrowing. Then, according to real situation of that year, we still set deposit return rate as $0.16\%$ and interest rate for loan as $3\%$ annually. Considering transaction cost and let proportion be $1\%$ which is an approximate to commission fees under different situations. Finally take position bounds into account and set it to 250000 after optimisation for simplicity. After adding new risk-free return rate form to asset constitution, new transaction cost to objective function, $2n$ rows in sparse matrix for inequality constraints and keep equality constraints the same as before, we obtained a new portfolio shown in \hyperref[Table 5.5]{Table 5.5} and Figure 5.3. From the new allocation of portfolio we notice that composition and even proportion are stupendously similar to previous results. It is reasonable as transaction cost put in objective function does not affect the optimisation results for portfolio amounts. Yet its unit objective function value now increase to 0.15 from 0.03 and 0.64 from 0.37 due to transaction cost and position bounds. Portfolio constraints for position actually restrict the portfolio within certain amounts and increase the stability of optimisation process. Furthermore, higher interest rates for borrowing cash also imposed restriction on amount of shorting. Other output results like expected payoff, s.d., VaR and CVaR are approximate to previous situation(may vary slightly due to perturbation of simulation) for initial portfolio's, yet for the other two optimised portfolios, risk measures increases as expected and still remain original properties such as CVaR should be larger than VaR. 
+\begin{table}[t!]\label{Table 5.5}
+\centering
+\caption{New Portfolio Constitution with More Constraints}
+\begin{tabular}{ |p{3.2cm}||p{1.4cm}|p{1.4cm}|p{1.4cm}|p{1.4cm}|p{1.8cm}| }
+ \hline
+ \multicolumn{6}{|c|}{Main Portfolio Constitution with More Constraints} \\
+ \hline
+Two Portfolios&Short Option 7&Short Option 8&Long Stock&Short Cash&Objective Function Value\\
+ \hline
+Optimised(s.d.)& 0 &-0.83&7.63&-5.79&0.15\\
+Optimised(CVaR)&-1.42&0&8.93&-6.66&0.64\\
+ \hline
+\end{tabular}
+\end{table}
+\begin{table}[t!]
+\centering
+\caption{Summarised Form of Main Results}
+\begin{tabular}{ |p{3.1cm}||p{2cm}|p{2cm}|p{2cm}|p{2cm}| }
+ \hline
+ \multicolumn{5}{|c|}{Payoff's Mean, s.d., VaR and CVaR} \\
+ \hline
+3 Portfolios& Expected payoff&s.d. of the payoff&VaR&CVaR\\
+ \hline
+Original& 1071900.023&1301653.474&1914996.543&3275828.678\\
+Optimised(s.d.)&1071900.023&345679.067&581495.938&802776.424\\
+Optimised(CVaR)&1071900.023&406875.016&413492.080&520585.254\\
+ \hline
+\end{tabular}
+\end{table}
+\begin{figure}[t!]
+  \centering
+  \includegraphics[scale=0.3]{Newportfolio.png}
+  \caption{New Portfolio Constitution after Adding More Constraints \label{fig:scaled_diss}}
+\end{figure}
+
+
+
+
+
+

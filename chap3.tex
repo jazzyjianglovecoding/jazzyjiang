@@ -1,0 +1,129 @@
+\section{Introduction}
+The problem needed to be solved in this chapter is to predict the monthly settled cases settled to give probable estimate next month given historical data. The online course \textit{STAT 510: Applied Time Series Analysis} by The Pennsylvania State University (2017)\hl{\cite{7}} provided all kinds of theoretical basics. The experimental part of this chapter mainly benefited from the book \textit{How to Prepare Data and Develop Models to Predict the Future} by Jason Brownlee (2017) \hl{\cite{9}}. The book shows how to get results on univariate time series forecasting problems using the Python ecosystem. Four main processes adopted in our time series forecasting include data preparation and exploration, temporal structure checking, model evaluation, and finally model forecasting (please see \href{https://www.mailman.columbia.edu/research/population-health-methods/box-jenkins-methodology}{\colorbox{Graylight}{Box-Jenkins}} framework for more details)
+
+\section{Methodology}
+Firstly, we did a data exploration via summary statistics, distribution and density analysis to see if a data transformation is needed. Next, we checked stationarity as it is assumed in time series analysis. We can define auto covariance function as $\gamma(s,t)=COV(y_s,y_t)=E(y_s-\mu_s)(y_t-\mu_t)$. Then stationarity can be defined as Definition \hl{\ref{Definition of Stationarity}}. We can also assure stationarity by statistical test. Here we used Augmented Dickey Fuller Test which can be briefly described as Definition \hl{\ref{Definition of ADF}}. Afterwards, we need to check autocorrelation as well as partial autocorrelation which are defined as Definition \hl{\ref{Definition of ACF and PACF}}. All these function can be treated as criteria for choosing right lag orders for future modelling.\\
+\indent After all the preparation, we can start our modelling process by split train set again to 80\% and 20\% proportion for walk-forward validation(test dataset will only be used once at last). Two commonly used model evaluation error metrics applied through the process are root mean squared error(RMSE) and mean absolute percentage error(MAPE). The former standard is scale-dependent which is always used as a method to compare different forecasting models on a single data set while the latter criteria have more power comparing different data sets. Additional criteria used for evaluation of the model are Akaike information criterion (AIC) and Bayesian information criterion (BIC). A lower AIC and BIC means a model is considered to be closer to the truth or more likely to be the real model. \\
+\indent We established a baseline of performance which will provided a template for evaluating models called naive forecast. The model simply takes last period's actuals as this period's forecast without adjusting or attempting to establish causal factors. Next, we improved the baseline with a better naive model called Smoothing Moving Average which uses trailing moving average with a window of 3 on historical observations. It can easily be applied in a walk-forward manner. After two simple attempts of forecasting, now we can move on to $AR(p)$, $MA(q)$, and $ARMA(p,q)$ model (Definition \hl{\ref{Definition of AR(p)}}, Definition \hl{\ref{Definition of MA(q)}}, Definition \hl{\ref{Definition of ARMA(p,q)}}). Via the plot from previous ACF and PACF functions, we need to identify the order of p and q to set three algorithms. Identification of AR model is often best done with PACF. The property of PACF of AR(p) model will always "shuts off" past the order of the model which means the number of non-zero partial autocorrelations can decide the order of the AR model. However, the theoretical PACF does not shut off, and it will always tapers toward 0 in some manner.Instead, ACF has a clearer pattern for an MA model which will have zero values when lags involved in the model. If both the ACF and PACF show a drop-off at the same point, then perhaps there is a need to bring in a mix of AR and MA which is ARMA model. If we further consider the order of differencing into the ARMA model, then Autoregressive Integrated Moving Average(ARIMA) with differencing degree d equals to 0 and cutoff lag p and q equal to 1 would be a good start point according to previous analysis. More general rules of choosing the degree for d are listed below:
+ \begin{itemize}
+    \item A model with 0 degrees of differencing take the assumption that the original series is stationary(mean reverting like stock price) 
+    \item A model with 1 degree of differencing assumes that the original series has a constant average trend (random walk)
+    \item A model with 2 degrees of differencing assumes original series belongs to a time-varying trend (random trend)
+    \item If the series has obvious positive autocorrelations out to a high number of lags, then it may need a higher order of differencing
+ \end{itemize}
+\indent For a better performance of the model, one can apply a similar process with machine learning called model tuning which automates the process of training and evaluating models on different combinations of hyper parameters. RMSE is selected as the criteria of grid search. Furthermore, the iterated function must keep track of the lowest error score observed as well as the configuration that caused it. This can be summarised at the end of the function with a print to standard out. Additionally, it is recommended that warnings be ignored to avoid a lot of noise from running the procedure. Finally, we can tune the ARIMA model fit parameters ranging from "disp" to "transparas" to push the boundary of the model. The final check of the model is via reviewing the residual errors. Ideally, the residual will distribute like a Gaussian noise $\varepsilon_t$ defined before. Summary statistics can give us an overview and a baseline to correct the predictions. If the mean is non-zero, then the predictions might be biased. The biased mean then can be added to each forecast for bias correction. Furthermore, the residual distribution plot can provide evidence that if a power transform needed or not through characteristics of tails. It is also a good way to check autocorrelation of the residual errors. Lastly, after the model have been developed and finalised, we can apply model validation on the final model. The model will be saved and then loaded to apply on the previous unseen hold-on test data with a rolling-forecast manner. 
+
+\section{Analysis of Results}
+The datasets come from the original Woodruff source with 2700 settled cases. The subset of original Woodruff dataset provides the number of monthly settlement cases from April 1988 to March 2017 with 347 observations. One outlier in the dataset of 2009 October was removed. Before processing to our main models, we need to split the dataset into 80\% and 20\% training and test sets with 278 and 69 observations separately forexperiment. The summary statistics can be concluded by the following table:
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\thead{count} & \thead{mean} & \thead{std} & \thead{min} & \thead{25\%} & \thead{50\%} & \thead{75\%} & \thead{max}\\
+\hline 
+278.00 & 8.27 & 3.51 &1.00 & 6.00 & 8.00 &10.00 & 21.00\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Observation Statistics}
+\end{table}
+The number of observations(count) matches our expectation. The percentile as well as standard deviation is relatively large spread to data. Afterwards, we can directly plot the time series to get some insight. There do not appear to be any obvious outliers and seasonality in the trend which may suggest that the series is already stationary. For a further understanding of the data structure, we can check the density and histogram of the observations. We found it right skewed with a long tail. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.7]{Timeseries.png}
+  \caption{Monthly Number of Cases Settled}
+\end{figure}
+Therefore, we can apply square root transformation as shown below. After transformation, we can see that power transform improved the normality of series data which provide a solid foundation to satisfy lots of statistical assumptions in future forecasting models. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{Squareroot.png}
+  \caption{Square Root Transformation of Data}
+\end{figure}
+Furthermore, we can group the monthly data by year and get some insight about how the spread of each year may be changing. Since 1988 and 2006 do not contain full 12 months which may not be a useful comparison with other observations for other years. Therefore, only data between 1989 and 2005 in train set was plotted. The observation suggests that there is no obvious trend and there are no outliers each year. The spread of middle 50\% of the data (blue boxes) does appear reasonably stable. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.45]{Boxtimeseries.png}
+  \caption{Box Whisker Plot over Years}
+\end{figure}
+Next, we conducted an ADF stationarity test as follows. The results from the table show that the test statistic value -3.95 is smaller than the critical value at 1\% of -3.45 which suggests the null hypothesis can be rejected with a significance level of less than 1\%. Therefore, we can conclude that time series is stationary without time-dependent structure. 
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\thead{ADF Statistics} & \thead{p-value} & \thead{Critical Values: 1\%} & \thead{5\%} & \thead{10\%} \\
+\hline 
+-3.952621 & 0.001680 & -3.455 &-2.872 & -2.572\\
+\hline
+\end{tabular}
+\end{center}
+\caption{ADF Test Results}
+\end{table}
+Next, we identified the orders of p and q that we are supposed to set later for modelling by ACF and PACF plot:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.25]{ACFPACF.png}
+  \caption{ACF and PACF Evaluation}
+\end{figure}
+The PACF shows a significant lag at one month and some significant lags for later two months. Hence, p=1 or p=3 might be a good start for AR model. On the other hand, the ACF shows a big lag for one month and then cut off later on which suggests q=1 is a good start for MA model. Nevertheless, two naive models can be set as the baseline for comparison as follows. As shown in the figure, the forecasting just takes the value of previous day with 0.697 RMSE and 21\% MAPE which is not bad. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.45]{Naive.png}
+  \caption{Persistence Naive Forecast}
+\end{figure}
+Next, the autoregressive model can be brought in. Built in function in stats model automatically chose the lag 15 as the order which is interesting given how close this lag is to the number of months in a year. The RMSE now improved around 0.13 to 0.568 and MAPE 0.027 to 19\%. \begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.45]{AR15.png}
+  \caption{Autoregressive Model With Lag 15}
+\end{figure}
+After we took a mix by ARMA(p,q) model and use AIC and BIC as criteria. The algorithm selected the optimal order with $p=1$, $q=1$ for lowest RMSE. Since the time series data is already stationary as checked before, thus ARIMA(p,d,q) model can be used where configuration can be set as $p=1$, $q=1$, $d=0$. The full regression results are summarised in the Table \hl{\ref{ARIMA(1,0,1)}}. From the model summary results, we can write the fitted model as: 
+\begin{equation}
+y_t=0.98y_{t-1}+\varepsilon_t-0.88\varepsilon_{t-1}+2.66
+\end{equation}
+The parameters are estimated via maximising the log likelihood of making the observations(MLE) which is equivalent to minimisation of the conditional sum of squares function (CSS). The real log likelihood of the model, in the end, is 232.125. The p-value of the constant, autoregressive and moving average terms are all 0 which indicates the model is not overfitting. For a better examination, we can again turn to model diagnostics via test dataset. The new model seems to capture more past error information and a slightly lower RMSE was accomplished. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.45]{ARIMA11.png}
+  \caption{ARIMA(1,0,1) Forecasting Model}
+\end{figure}
+Next, we automated the process of evaluating a large number of  hyper-parameters for ARIMA model by a grid search procedure with specified p, d and q range. Here we set p and q both from 1 to 4 and d either 0 or 1., the results can refer to Table \hl{\ref{ARIMAGrid}}. From the table, the best model(RMSE equals to 0.554) is obtained  with p=4, d=1, and q=1. Another observation is that when the degree of difference and order of MA model both equal to 1, the model tend to perform better. The fitted model can be written as(please see Table\hl{\ref{ARIMA(4,1,1)}}):
+\begin{equation}
+y_t=-0.027y_{t-1}-0.020y_{t-2}-0.146y_{t-3}-0.051y_{t-4}+\varepsilon_t-0.859\varepsilon_{t-1}+0.0002
+\end{equation}
+The log likelihood improved a little from 232 to 233. Lag 3 of the autocorrelation and lag 1 of moving average now are statistically significant while the other terms are not. This might suggest an overfitting of AR part in the model. From the following figure plot, we can see that the overall trend of predictions is similar to ARMA(1,1) model presented before, yet it is not as smooth as before. The RMSE is the lowest while MAPE increased a little compared to AR and ARMA models presented before. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.45]{ARIMA411.png}
+  \caption{ARIMA(4,1,1) Forecasting Model}
+\end{figure}
+For a final diagnosis, we can review the residual errors($\varepsilon_t$). We can check via summary statistics and plots as follows. The distribution has a left shift and that the mean is non-zero at -0.8.
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\thead{count} & \thead{mean} & \thead{std} & \thead{min} & \thead{25\%} & \thead{50\%} & \thead{75\%} & \thead{max}\\
+\hline 
+56.00 & -0.080 & 0.556 &-1.526 & -0.388 & -0.009 &0.177 & 1.226\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Residual Statistics}
+\end{table}
+From the plotted residual errors below we can recognise a Gaussian-like distribution with no evident skew which guarantees the stability of the model again. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.55]{Errordistribution.png}
+  \caption{Residual Error Distribution}
+\end{figure}
+Then we added the mean residual error -0.8 to each forecast made in the model to correct the bias. The summary of the new forecast residual errors proves that the new average value was indeed moved to a value close to zero. Besides, the new model has the smallest RMSE 0.551 and a better MAPE 19.7\%. \\
+\indent We can also plot the autocorrelation of residuals to check for any significant autocorrelation. Except at zero lag, the remaining autocorrelation values all lie within certain bounds which imply the residuals(white noise) captured the patterns in the data quite well. Though there is a small autocorrelation left in the residuals (4th, 15th spike in the plot) which suggests the model can be slightly improved, it is unlikely to make much increase to the resulting forecasts.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.4]{residualacfpacf.png}
+  \caption{Residual Error Distribution}
+\end{figure}
+Finally, we deployed the model with all coefficients and bias value and made a trial via fitting the whole train set and made one prediction 2.290. The prediction gives the result we would expect in the first instance. Use the newly fitted model to predict the final hold back test(unseen before), we get the following fitted plot. The RMSE is stable and much better than the expectation of an error of more than 0.551.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.45]{finaltestprediction.png}
+  \caption{Forecast for Monthly Sales Hold Back Test Dataset}
+\end{figure}

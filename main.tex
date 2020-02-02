@@ -1,0 +1,153 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ left=32mm,
+ right=32mm,
+ top=30mm,
+ bottom=35mm
+ }
+\usepackage{graphicx,epsfig}
+\usepackage{amsfonts}
+\usepackage{amsthm, amsmath}
+\usepackage{amssymb,amsmath,amsthm,amsfonts}
+\newtheorem{theorem}{Theorem}
+\newtheorem{defn}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{prop}{Proposition}
+\usepackage{etoolbox}
+\usepackage{fourier} 
+\usepackage{array}
+\usepackage{makecell}
+\AfterEndEnvironment{defn}{\noindent\ignorespaces}
+\AfterEndEnvironment{example}{\noindent\ignorespaces}
+\AfterEndEnvironment{theorem}{\noindent\ignorespaces}
+\AfterEndEnvironment{prop}{\noindent\ignorespaces}
+\AfterEndEnvironment{proof}{\noindent\ignorespaces}
+
+\usepackage[utf8]{inputenc}
+\usepackage[justification=centering]{caption}
+\usepackage{ragged2e}
+\usepackage{quotchap}
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{tabulary}
+\usepackage{ltablex}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+\usepackage{soul}
+\soulregister\ref7
+\soulregister\cite7
+\usepackage{multirow}
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+\lstset{language=Python,%
+    basicstyle=\scriptsize,
+    keywordstyle=\color{blue},%
+    morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},%
+    stringstyle=\color{mylilas},
+    commentstyle=\color{mygreen},%
+    showstringspaces=false,%without this there will be a symbol in the places where there is a space
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    numbersep=9pt, % this defines how far the numbers are from the text
+    emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+}
+
+\def\beq{\begin{equation}}
+\def\eeq{\end{equation}}
+\AfterEndEnvironment{equation}{\noindent\ignorespaces}
+\newcommand{\barr}{\begin{array}}
+\newcommand{\earr}{\end{array}}
+\newcommand{\bqr}{\begin{eqnarray}}
+\newcommand{\bqq}{\begin{eqnarray*}}
+\newcommand{\eqr}{\end{eqnarray}}
+\newcommand{\eqq}{\end{eqnarray*}}
+\newcommand{\squeezeup}{\vspace{-4mm}}
+\newcommand{\squeezeupu}{\vspace{-2mm}}
+\newcommand{\squeezedown}{\vspace{4mm}}
+\parindent=25pt
+\parskip 0.10in
+\newcommand\bovermat[2]{%
+  \makebox[0pt][l]{$\smash{\overbrace{\phantom{%
+    \begin{matrix}#2\end{matrix}}}^{\text{#1}}}$}#2}
+  \newcommand\partialphantom{\vphantom{\frac{\partial e_{P,M}}{\partial w_{1,1}}}}
+
+\renewcommand\theadalign{cb}
+\renewcommand\theadfont{\bfseries}
+\renewcommand\theadgape{\Gape[4pt]}
+\renewcommand\cellgape{\Gape[4pt]}
+
+\usepackage[table]{xcolor}
+\definecolor{Gray}{gray}{0.9}
+\definecolor{Graylight}{gray}{0.9}
+
+\usepackage{pdfpages}
+
+\usepackage{smartdiagram}
+\usetikzlibrary{shapes.geometric}
+\tikzset{
+treenode/.style = {draw,ellipse, align=left,
+                 top color=white, bottom color=blue!20},
+root/.style     = {treenode, font=\large, bottom color=white},
+env/.style      = {treenode, font=\ttfamily\normalsize},
+dummy/.style    = {circle,draw}
+}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{fadings}
+
+\date{September 2017}
+\begin{document}
+
+\includepdf[pages=-]{coverpage.pdf}
+
+\setcounter{page}{1}
+
+\chapter*{\centering{Abstract}}
+\input{Abstract.tex}
+
+\chapter*{\centering{Acknowledgements}}
+\input{Acknowledgement.tex}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\chapter*{Remarks on Notation}
+\input{Remarks.tex}
+
+\chapter{Introduction}
+\label{Chapter 1}
+\input{Intro.tex}
+
+
+\chapter{Descriptive Analytics}
+\label{Chapter 2}
+\input{chap2.tex}
+
+
+\chapter{Time Series Analysis and Forecasting}
+\label{Chapter 3} 
+\input{chap3.tex}
+
+\chapter{Predictive Modelling}
+\label{Chapter 4}
+\input{chap4.tex}
+
+
+\chapter{Conclusion and Future Developments}
+\input{conclu.tex}
+
+\chapter{Appendix}
+\input{appendix.tex}
+
+\begin{thebibliography}{99}
+\input{biblio.tex}
+\end{thebibliography}
+
+\end{document}

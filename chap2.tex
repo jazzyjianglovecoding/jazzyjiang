@@ -1,0 +1,87 @@
+\section{Introduction}
+There are two most recent papers both published on Cornerstone Research provided lots of insight of SCA lawsuits market conditions: \textit{Securities Class Action Settlements} reported by Laarni T. Bulan(2017)\hl{\cite{4}} are based on 1621 securities class actions filed after passage of the Private Securities Litigation Reform Act of 1995 (Reform Act) and settled from 1996 through year-end 2016. The report explored some new area ranging from case complexity to settlement characteristics besides common analysis like settlement size. Another useful reference is \textit{Securities Class Action Filings 2016} by Alexander Aganin \hl{\cite{3}} which are more focused on  the analysis of number of cases over different sectors. Our datasets for Security Class Actions analysis are based on Woodruff-Sawyer SCA Database through March 2017 with 4957 securities class actions. Quid and BigMl will be utilised for text mining analytics while Tableau will be mainly for settlement and number of cases analytics. 
+\section{Text Analysis}
+Using Tag Cloud function in BigMl for SCA description(text feature) of all 4957 companies, we can get the insight that the security class actions are always negative for a company from the words like 'failed', 'misleading', 'adverse', and 'false'. Another finding is that SCA is related to financial statements, accounting improperly.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.37]{Wordcount.png}
+  \caption{Word Count of SCA Description}
+\end{figure}
+\indent If we use 'D\&O Claims' as key word (Time: 2013 to 2017 with most important countries, we will have around 1030 top tier quality stories with 25\% unique ones. Firstly, it is evident that the publicity of D\&O claims are increasing over the years and reached the peak in the first quarter of 2017. Besides, US and UK have drawn most of the attention of D\&O claims. The increased inclination of activity from the Australian Securities and Investments Commission may be the reasons that the government announced plans for additional resources and the downturn of Australian economy. Whistleblower protections being ramped up in Canada might be one of many reasons why it reached the highest attention recently. Another possible reason might be brought by environmental clean-up costs. Finally, directors and officers in Hong Kong are coming under more and more regulatory scrutiny. The Securities and Futures Commission (SFC) is always active in pursuing actions against market misconduct.\\
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.42]{Countryoveryears.png}
+  \caption{Regional Trends over Years}
+\end{figure}
+The network plot below considering most mentioned institution provides another visual perception of how D\&O claims penetrated into the different area. It is understandable that institutions like US Securities And Exchange Commission (SEC) and Financial Conduct Authority (FCA) account for the largest percentage since it is the main organisation for investigation in US and UK. Another type of institutions consists of all kinds of courts raging from supreme court to district court. This is where security class action which is the main cause of D\&O claims been executed. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.38]{Primaryinstitution.png}
+  \caption{Most Mentioned Primary Institutions over Years}
+\end{figure}
+\section{Settlement Analysis}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.31]{SettlementAmount.png}
+  \caption{Cash Settlement Amount by Years}
+\end{figure}
+The most direct result come from SCA lawsuits is settlement amount. From the above figure, we can see top three cash settlement happened separately in 2005, 2007, and 2016 with mega settlement(over one billion) which is reasonable. Meanwhile, the total cash settlement amount almost doubled from 2015 to 2016, and are still increasing this year. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.36]{Top15.png}
+  \caption{Top 15 Settlement}
+\end{figure}
+Combined with top 15 settlement, it is evident that recent years have witnessed some huge liability cases with settlement over one billion. Especially 2012 and 2016 when Bank of America and Household of International triggered billions of settlement which is the main reason for two peaks in recent six years. Moreover, the average settlement amount overrun \$72 million in 2016, up by almost \%36 compared to 2015. Nevertheless, after excluding the mega cases, the mean settlement reduced from \$53 to \$43 million. Under this circumstance, civil litigation costs and defence costs can cause hundreds of millions D\&O claims. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.31]{AverageSettlementwithAllegation.png}
+  \caption{Cash Settlement and Market Value Drop w.r.t. Accounting Allegation}
+\end{figure}
+From the above figure, most of the cases violated Accounting Improprieties and Inadequacies as well as Violation of GAAP. Take a closer look at the average cash settlement and market value drop over years concerning characteristic Accounting Improperties, we can find that those who settled with this allegation type tend to have a larger settlement amount and market value drop.\\ 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{Sector.png}
+  \caption{Average Cash Settlement Amount by Industry Sector}
+\end{figure}
+From the perspective of industry sector, we can see that those companies who belong to Sate Commercial Banks, Professional Services, and Building Materials have the largest cash settlement amount on average while Non-state-owned Banks, Pharmaceutical Preparations, and Packaged Software Service have a higher frequency. SCA activity involving banks represents is common all the time. According to NERA report, under 20 largest failed banks before 2010, 8 were involved in SCA litigation through the end of 2009. Another discovery is that there is an evident uptick in biotechnology (biopharmaceutical) and pharmaceutical companies mainly due to the reason that defendants hide negative information about their lead drug product's prospects for approval by the Food and Drug Administration and European Medicines Agency. \\
+\indent Finally, if the average settlement amount is distinguished by Stock Exchange as follows, we can find that NYSE takes the largest amount of settlement on average which is rational since it has all kinds of largest companies listed. However, the highest number of cases filed(differentiated by colour) goes to Nasdaq. This can be explained by the reason that number of cases listed on it is around 2900, over 50 percent higher than NYSE. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.37]{StockExchange.png}
+  \caption{Average Cash Settlement by Stock Exchange Place}
+\end{figure}
+\section{Number of Cases Analysis}
+From the following figure, we can see that the total number of cases filed each year are quite stable through years. Filings in 2016 continued to be mainly accumulated in the Second and Ninth Circuits among which there are 36 cases filed in the Ninth Circuit (a 25\% decrease compared to 2015) and 30 filed in the Second Circuit. Third Circuit filings reached 16, the highest in recent seven years. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.34]{Circuit.png}
+  \caption{Number of Cases Over years by 11 Circuits}
+\end{figure}
+The above hot map shows the distribution of case status over US states. As expected, New York and California State, where most of US companies based, filed the most of the cases. At the same time, cases in CA almost tripled those in NY state which is accordant with the fact that they belong to Circuit nine(CA) and Circuit two(NY) separately. Moreover, cases are more centralised in east area which implies there are more companies headquartered at east.\\
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.34]{Map.png}
+  \caption{Number of Cases by State and Status}
+\end{figure}
+If we divide the whole industry into three high-level segments (Commercial, Financial and Pharmaceutical companies), we can find that commercial companies tend to be sued more w.r.t total numbers. Nevertheless, after divided by the corresponding number of companies in each field(frequency), it is clear that the pharmaceuticals field take the lead now. Furthermore, there is an evident increase of frequency within recent five years especially in pharmacy. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{Frequencyhigh.png}
+   \caption{Frequency and Percentage in each High Level Category}
+\end{figure}
+Furthermore, if we take a closer look at the subjective reason of SCAs, we can clearly see that over half of cases consists of Misconducted Financial Misreporting or Guidance and Financial Restatement. In addition, more than one third are made up of Sales Manipulation and IPO Prospectus categories. In more detail, the pharmaceutical field will always incur drug testing and trial problem. Most problems appeared at the last stage when new drug application is involved. For 
+more details of SEC charges of misconduct, please see \href{https://www.sec.gov/spotlight/enf-actions-fc.shtml}{\colorbox{Graylight}{Addressing Misconduct}}.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.33]{SCA.png}
+   \caption{SCA Category Distribution}
+\end{figure}
+Last but not the least, we can draw a heat map within most significant sectors across weekdays and months.The figure indicates that most of SCA cases tend to happen during the weekdays(especially Thursdays) except Friday. Another finding is that cases are all inclined to take place in the first quarter, April, and July. This might be the reason that generally, US companies reveal their annual report quarterly report during that period which is more appealing to the public. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.3]{Heatmap.png}
+   \caption{Number of Cases in each Market Cap Band by Date}
+\end{figure}
+
+
+

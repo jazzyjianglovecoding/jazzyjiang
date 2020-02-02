@@ -1,0 +1,578 @@
+\section{Introduction}
+Classification model and a regression model for settle/dismiss and settlement amount prediction will be introduced in this chapter. The main references in this chapter come from \textit{STAT 897D: Applied Data Mining and Statistical Learning} by The Pennsylvania State University(2017)\hl{\cite{8}} and the e-book \textit{Master Machine Learning Algorithms} by Dr. Jason Brownlee(2017)\hl{\cite{10}}. Furthermore, \textit{Practical Machine Learning} course by Johns Hopkins(2014)\hl{\cite{18}} was followed to further understand all kinds of building blocks of applying prediction functions. Lastly, \textit{Model evaluation, model selection, and algorithm selection} by Sebastian Raschka(2016)\hl{\cite{19}} provided a solid foundation of selecting the model as well as tuning the parameters for the algorithm. The final results were compared with the results of Blakeley B. McShane(2012)\hl{\cite{2}}. In the end, we find that all the binary allegation variables have the expected positive sign in both the settlement/dismissal model and settlement amount model. Besides, All the damages variables such as market cap and google hits have the expected positive relationship with settlement amount portion,  whereas a few variables like market cap(without insider holding) have a negative sign in the settlement/dismissal model. This implied that cases selected for filing might be biased in the direction of larger potential damage awards. Before going to the details of methodology part, we outlined the main algorithms that applied in this chapter.\\
+\begin{tikzpicture}
+\tikzset{
+level 1/.style={ edge from parent path={
+        (\tikzparentnode) to[out=180, in=0] (\tikzchildnode)
+        -- (\tikzchildnode)
+    }},
+level 2/.style={minimum width=200pt,align=left, edge from parent path={
+        (\tikzparentnode) to[out=180, in=0] (\tikzchildnode.south east)
+        -- (\tikzchildnode.south west)
+    },
+    sibling distance=0.6cm},
+level 1/.append style={level distance=4.5cm},
+level 2/.append style={level distance=5.5cm},
+%edge from parent/.style = {draw, -latex},
+every node/.style       = {font=\footnotesize},
+sloped,
+     }
+  \node [root]{\small{Algorithms}}
+ [grow=left]
+ child [sibling distance=2.5cm]{ node {Ensemble}
+            child { node  {Decision Tree(Foundation)}}
+            child { node  {Bagging}}
+            child { node  {Boosting}}
+            child { node  {Random Forest}}
+           }
+ child [sibling distance=2cm]{ node {Feature Selection}
+            child { node  {Correlation Coefficient Scores}}
+            child { node  {Chi Squared Test}}
+            child { node  {Recursive Feature Elimination(RFE)}}
+            child { node  {Sequential Forward Selection(SFS)}}
+            }
+ child { node{Neural Networks} 
+            child { node  {Perceptron}}
+           }
+ child [sibling distance=1.9cm] { node  {Regularisation}
+            child { node  {Ridge Regression}}
+            child { node  {Least Abs. Shr. and Sel. Ope. (LASSO)}}
+            child { node  {Elastic Net}}
+           }
+ child [sibling distance=2.1cm]{ node  {Regression}
+            child { node  {Linear}}
+            child { node  {Ordinary Least Squares(OLS)}}
+            child { node  {Logistic}}
+            child { node  {Stepwise}}
+            };
+ \end{tikzpicture}
+
+\section{Methodology}
+\subsection{Model Preparation}
+The adjusted data is clean enough with few blanks yet still require some cleaning for future modelling. The methods involved in data cleansing process are filtering, duplicates elimination, outliers removal, feature generation, and so on.  When the tidy data is ready, one of the first steps of statistical analysis is to check the distribution of the different variables. 
+\begin{table}[H]
+\caption{Standardisation and Normalisation Methods}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\rowcolor{Graylight}
+Method & Math Operation & Advantage & Disadvantage\\
+\hline
+Logarithm  & $\ln{x}$ or $\log_{10}x$ & Right skewed data & 0 and negative values\\
+\hline
+\rowcolor{Gray}
+Square root & $\sqrt{x}$ &  Right skewed data & Negative values\\
+\hline
+Square & $x^2$ & Left skewed data & Negative values\\
+\hline
+\rowcolor{Gray}
+Z-Score & $z=\frac{x-\mu}{\sigma}$ & Negative Values & Depends\\
+\hline
+Min-Max & $x_{norm}=\frac{x-x_{min}}{x_{max}-x_{min}}$ & preserve range & Depends\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+To make all variables under the same measurement as well as getting a better linear relationship and stable variance, we need to standardise or normalise most of our continuous variables. Commonly used standardisation and normalisation methods are displayed and compared as above. Log and Z-Score methods were adopted for our data since most of the features are right skewed and some financial features have lots of negative values. Feature-feature relationships and Box-Whisker plots were conducted for a deeper understanding of our features afterwards. 
+\subsection{Feature Selection}
+When the final set is ready, we need to select features for our predictive modelling. The best subset of features will reduce overfitting and complexity of the model and improve training efficiency and accuracy. Three methods are utilised in our feature selection process. 
+\subsubsection{Filter Methods}
+Filter method are always used as a preprocessing step, and there is no machine learning algorithm involved. The method can be articulated by the following flow chart:\\
+\begin{center}
+ \smartdiagramset{border color=none,
+   uniform color list=teal!60 for 4 items,
+   back arrow disabled=true,
+   module x sep=3cm,
+    text width=2.5cm,
+    module x sep=3.5cm
+ }
+ \smartdiagram[flow diagram:horizontal]{Set of All Features, Selecting the Best Subset, Learning Algorithm, Performance}
+ \end{center}
+All the features are selected via diversified statistical tests via their correlation with dependent variable. Pearson's Correlation is chosen for the settlement amount model. Its value range from -1 to 1, and corresponding mathematical expression is:
+\begin{equation}
+\rho_{X,Y}=\frac{cov(X,Y)}{\sigma_{X}\sigma_{Y}}
+\end{equation}
+where $X$ and $Y$ represents two different variables. For binary outcome and categorical features in the original dataset, Chi-Square is conducted. It a statistical test used for all categorical features to assess the likelihood of correlation between them via frequency distribution. It can be written as:
+\begin{equation}
+\tilde{\chi}^2=\frac{1}{d}\sum_{k=1}^{n} \frac{(O_k - E_k)^2}{E_k}\
+\end{equation}
+where d is the degrees of freedoms, O is the observed frequency and E is the expected frequency. The larger the Chi-Square, the higher correlation between feature and dependent variable. The above two filter methods can provide an initial screening for both prediction models. We can also utilise filter method as a way to deal with multicollinearity problem.
+\subsubsection{Wrapper Methods}
+Other than subjectively choosing features via relevance of features, Wrapper Methods measure the usefulness by actually training a model. It can be based on the inference drawn from filter methods. The process can be visualised as:
+ \begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.38]{Wrapper.png}
+\end{figure}
+It is evident that Wrapper methods are more computationally expensive than filter models, yet more accurate to provide the best subset of features. For both prediction models, Stepwise Forward Selection(Definition \hl{\ref{Definition of Stepwise Forward Selection}}) was used as a baseline, Sequential Forward Selection(Definition \hl{\ref{Definition of Sequential Forward Selection}}) and Recursive Feature Elimination(Definition \hl{\ref{Definition of RFE}}) then came in as a further step. It is faster than Backward Selection since we have lots of features in the dataset. However, though stepwise forward is relatively cheap computationally, it overemphasises statistical significance as dropped features can still be correlated to the response variable. Compared to SFS method based on defined performance metric, RFE is computationally less complex using feature weight coefficients(linear algorithms) or sometimes feature importance(tree-based algorithms). It is still a greedy optimisation algorithm which repeatedly creates models and keeps aside the worst and best feature each iteration. 
+\subsubsection{Embedded Methods}
+ \begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.34]{Embedded.png}
+\end{figure}
+Embedded methods combine both filter and wrapper methods with built-feature selection methods. Some commonly used examples of these methods are LASSO, RIDGE and ElasticNet regression which we can use as linear regression at the same time. They all belong to regularised models with penalisation functions to reduce overfitting. Denote $E(X,Y)$ the loss function we want to minimise, $w$ the coefficients of the model and $\alpha$ the amount of regularisation parameter which is tunable. Then LASSO, RIDGE, and ElasticNet can be described more specifically as: 
+\begin{itemize}
+   \item \textbf{LASSO/L1 Regularisation}: LASSO adds penalty equivalent to the absolute value of the coefficients magnitude, i.e., put $\alpha\sum_{i=1}^{n}|w_i|$(L1-norm) to loss function $E$. It is a sparse solution which performs feature selection inherently as non-zero coefficients can be forced to 0. However, it will significantly fluctuate on small changes when there are correlated features. 
+    \item \textbf{RIDGE/L2 Regularisation}: RIDGE imposes penalty equivalent to the square of the coefficients magnitude, i.e., add L2 norm penalty $\alpha\sum_{i=1}^{n}w_i^2$ to the loss function $E$. It is more stable as the value of coefficients will be spread out more equally compared to LASSO especially for correlated features. 
+     \item \textbf{ElasticNet/L1 and L2 Regularisation}: ElasticNet is a hybrid technique of ridge and lasso regularisation where penalty added to the coefficients now become $\alpha\sum_{i=1}^{n}|w_i|+\frac{1-\alpha}{2}\sum_{i=1}^{n}w_i^2$, It is the same as lasso when $\alpha = 1$. As $\alpha$ shrinks toward 0, it will approach ridge regression. 
+\end{itemize}
+
+\subsection{Applied Algorithms}
+Firstly we built a multiple linear regression(Definition \hl{\ref{Definition of Linear Regression}}) as well as a logistic regression(Definition \hl{\ref{Definition of Logistic Regression}}) as our baseline models for future comparison. Multiple Linear Regression might be overfitted, thus some regularisation algorithms like Lasso, Ridge, and ElasticNet Regression defined before can be put to improve the potential problem. Next, Classification Trees(Definition \hl{\ref{Definition of Classification Tree}}) as supervised learning algorithm was brought in. Afterwards, we explored some ensemble models started from Bagged Decision Trees based on CART(Definition \hl{\ref{Definition of Bagging}}). Based on Bagged Decision Trees incorporating with CART algorithm, we extended to a more advanced algorithm called Random Forest. We still take bootstrap samples(with replacement), yet the trees are built for reducing the correlation between individual classifiers. More specifically, only a random subset of features are chosen for each split rather than exhaustively choose the best split node. Furthermore, we applied boosting ensemble algorithms involving Stochastic Gradient Boosting(Definition \hl{\ref{Definition of Gradient Boosting}}) as it can convert and combine those weak learners to s single strong one via the weighted average of their demonstrated accuracy.   Moreover, eXtreme Gradient Boosting(XGBoost), coded by Tianqi Chen, was installed and implemented to provide a more scalable, portable and accurate technique. What makes XGBoost unique is that it uses 'a more regularised model formalisation to control over-fitting, which gives it better performance,' according to the author. Next, Support Vector Machines Classifier was used. It is a common way to perform binary classification. More formally, it performs classification via the best hyper-plane that differentiate the two classes well enough from an n-dimension space. Finally, we explored a supervised neural network method called Multilayer Perception Classifier. It consists of source nodes constructing the input layer, one or more hidden layers, and an output of layer of nodes which can be seen from the figure below. The predictive ability of neural networks mainly derives from the multi-layered structure of the networks. Features are picked out from the data structure at different scales or resolutions and are combined into higher-order features. 
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[shorten >=1pt]
+		\tikzstyle{unit}=[draw,shape=circle,minimum size=1.15cm]
+		%\tikzstyle{hidden}=[draw,shape=circle,fill=black!25,minimum size=1.15cm]
+		\tikzstyle{hidden}=[draw,shape=circle,minimum size=1.15cm]
+
+		\node[unit](x0) at (0,3.5){$x_0$};
+		\node[unit](x1) at (0,2){$x_1$};
+		\node at (0,1){\vdots};
+		\node[unit](xd) at (0,0){$x_D$};
+
+		\node[hidden](h10) at (3,4){$y_0^{(1)}$};
+		\node[hidden](h11) at (3,2.5){$y_1^{(1)}$};
+		\node at (3,1.5){\vdots};
+		\node[hidden](h1m) at (3,-0.5){$y_{m^{(1)}}^{(1)}$};
+
+		\node(h22) at (5,0){};
+		\node(h21) at (5,2){};
+		\node(h20) at (5,4){};
+		
+		\node(d3) at (6,0){$\ldots$};
+		\node(d2) at (6,2){$\ldots$};
+		\node(d1) at (6,4){$\ldots$};
+
+		\node(hL12) at (7,0){};
+		\node(hL11) at (7,2){};
+		\node(hL10) at (7,4){};
+		
+		\node[hidden](hL0) at (9,4){$y_0^{(L)}$};
+		\node[hidden](hL1) at (9,2.5){$y_1^{(L)}$};
+		\node at (9,1.5){\vdots};
+		\node[hidden](hLm) at (9,-0.5){$y_{m^{(L)}}^{(L)}$};
+
+		\node[unit](y1) at (12,3.5){$y_1^{(L+1)}$};
+		\node[unit](y2) at (12,2){$y_2^{(L+1)}$};
+		\node at (12,1){\vdots};	
+		\node[unit](yc) at (12,0){$y_C^{(L+1)}$};
+
+		\draw[->] (x0) -- (h11);
+		\draw[->] (x0) -- (h1m);
+
+		\draw[->] (x1) -- (h11);
+		\draw[->] (x1) -- (h1m);
+
+		\draw[->] (xd) -- (h11);
+		\draw[->] (xd) -- (h1m);
+
+		\draw[->] (hL0) -- (y1);
+		\draw[->] (hL0) -- (yc);
+		\draw[->] (hL0) -- (y2);
+
+		\draw[->] (hL1) -- (y1);
+		\draw[->] (hL1) -- (yc);
+		\draw[->] (hL1) -- (y2);
+
+		\draw[->] (hLm) -- (y1);
+		\draw[->] (hLm) -- (y2);
+		\draw[->] (hLm) -- (yc);
+
+		\draw[->,path fading=east] (h10) -- (h21);
+		\draw[->,path fading=east] (h10) -- (h22);
+		
+		\draw[->,path fading=east] (h11) -- (h21);
+		\draw[->,path fading=east] (h11) -- (h22);
+		
+		\draw[->,path fading=east] (h1m) -- (h21);
+		\draw[->,path fading=east] (h1m) -- (h22);
+		
+		\draw[->,path fading=west] (hL10) -- (hL1);
+		\draw[->,path fading=west] (hL11) -- (hL1);
+		\draw[->,path fading=west] (hL12) -- (hL1);
+		
+		\draw[->,path fading=west] (hL10) -- (hLm);
+		\draw[->,path fading=west] (hL11) -- (hLm);
+		\draw[->,path fading=west] (hL12) -- (hLm);
+		
+		\draw [decorate,decoration={brace,amplitude=10pt},xshift=-4pt,yshift=0pt] (-0.5,4) -- (0.75,4) node [black,midway,yshift=+0.6cm]{input layer};
+		\draw [decorate,decoration={brace,amplitude=10pt},xshift=-4pt,yshift=0pt] (2.5,4.5) -- (3.75,4.5) node [black,midway,yshift=+0.6cm]{$1^{\text{st}}$ hidden layer};
+		\draw [decorate,decoration={brace,amplitude=10pt},xshift=-4pt,yshift=0pt] (8.5,4.5) -- (9.75,4.5) node [black,midway,yshift=+0.6cm]{$L^{\text{th}}$ hidden layer};
+		\draw [decorate,decoration={brace,amplitude=10pt},xshift=-4pt,yshift=0pt] (11.5,4) -- (12.75,4) node [black,midway,yshift=+0.6cm]{output layer};
+	\end{tikzpicture}
+	\caption[Networks of Neurons for a $(L+1)$-layer perceptron.]{Networks of Neurons}
+	\label{fig:multilayer-perceptron}
+\end{figure}
+
+\subsection{Model Selection}
+Model selection is the procedure of selecting between different machine learning algorithms or choosing different hyper-parameters for the same algorithm. Since our dataset is not large, thus maximising the accuracy of the model will be our main purpose. We split the dataset into the train and the hold out test by 80\% and 20\% proportion, and apply k-fold cross-validation on the training dataset for stability(reduce overfitting on the training set). K-fold cross validation process can be listed as follows:
+\begin{itemize}
+   \item Training dataset divided into k folds;
+   \item Iteratively use (k-1) folds for training and validate using the left fold;
+   \item Take the average of validation score
+   \end{itemize}
+Note that the hold out test set was only used once at the end to avoid an overly optimistic estimation of generalisation error.
+\subsubsection{Classification Model Evaluation}
+After the probability(0-1) has been predicted via different algorithms, we can set threshold(usually 0.5) which assign 1(>threshold) and 0(<threshold) label to the final output. Then there will be four different types values which make up the so-called confusion matrix:
+\begin{itemize}
+   \item True positives (TP): Actual Value 1 which were also labeled 1
+   \item True negatives (TN): Actual Value 1 which were labeled 0
+   \item False positives (FP):  Actual Value 0 which were labeled 1
+   \item False negatives (FN):  Actual Value 0 which were also labeled 0
+\end{itemize}
+Thus changing the threshold results in a tradeoff between true and false positive rates. Commonly used evaluation metrics can be listed in the Table \hl{\ref{binaryevaluate}}. Since our data is not highly biased(huge difference between 1 and 0 values of target variable), there will be no nuance between different metrics. Therefore, two main metrics used for our model selection are F1 Score and Matthews Correlation Coefficient(MCC) as they take into account most situations of the confusion matrix and are generally regarded as balanced measures. Additionally,  Area Under the Curve(AUC) was calculated for Receiver Operating Characteristics. It looks like the following figure:
+ \begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.6]{roc.png}
+  \caption{General Receiver Operating Characteristics Curves}
+\end{figure}
+X-Axis means false positive rate(fall-out) while the y-axis represents true positive rate(recall), Each point of the curve is corresponding to a cutoff. Thus, ROC curve visualises the performance of the classifier across all cutoff thresholds. Thus it is a threshold-independent method compare to other metrics which only tell for one specified cutoff. The better the classifier is, the more area under the curve there is. An AUC equal to 0.5 like the dotted red line in the figure suggests a random guessing while a value above 0.6 is considered fair. 
+
+\subsubsection{Regression Model Evaluation}
+Main evaluation techniques used in regression models  are Mean Squared Error(MSE), Mean Absolute Error(MAE), Media Absolute Error, and Coefficients of Determination(R Square). Firstly, let y be the response variable, and the residual be defined as $e_i = y_i - \hat y_i$ where $y_i$ the actual value and $\hat y_i$ the estimated value. It can be interpreted as estimates of the regression error $\epsilon_i$ which should be normally distributed. Thus, a plot of residuals versus predicted values ideally should be within a horizontal random band and departures from this form indicates difficulties with the model. Mathematically, MSE, MAE and MAD can be separately defined as: 
+\begin{align}
+MSE=\frac{\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}{n-2}=\frac{\sum_{i=1}^{n}e_i^2}{n-2} \\
+MAE = \frac{1}{n}\sum_{i=1}^n \left| y_i - \hat{y_i}\right| =\frac{1}{n}\sum_{i=1}^n \left| e_i \right|  \\
+MAD= median(|y_i-median(y)|)
+\end{align}
+Next, if we denote $\bar{y}$ as the mean of response variable, then SSR, SSE, and SST can be defined(Table \hl{\ref{Rsquare}}). $SST=SSE+SSR$. Then R Square $R^2(0 \leq R^2 \leq 1)$ can be defined as the percent of total variability that is explained by the regression model, specifically:
+\begin{equation}
+R^2 = \frac{\text{SSR}}{\text{SST}} = \frac{\sum_{i=1}^n (\hat y_i - \bar y)^2}{\sum_{i=1}^n (y_i - \bar y)^2} = 1 - \frac{\text{SSE}}{\text{SST}} = 1 - \frac{\sum_{i=1}^n (y_i - \hat y_i)^2}{\sum_{i=1}^n (y_i - \bar y)^2}
+\end{equation}
+As the SST is a constant, we want to minimise residual variation(equivalent to maximise regression variation) to get the best fit. Put it another way, the closer R-squared is to 1, the better a fit the line is. Nevertheless, $R^2$ can be misleading when the model is overfitted. It will always inflate when more predictors are added, even if the predictors added are unrelated to the response variable. Finally, we chose MSE as our main evaluation matrix and other measurements as the comparison.
+\subsubsection{Hyper-parameter Selection}
+For some of our models, we used Random Search to tune the parameters of the estimator. Compared to Grid Search which is just exhaustively searching through combinations of hyper-parameters, it often has the same efficiency as a complete grid search with less time. This is mainly because that hyper-parameters will not badly affect the loss.
+\subsection{Model Improvements}
+If the algorithm still doesn't perform very well, we can further push the boundary of the performance by a tradeoff between Bias Error and Variance Error. High-Bias means more assumptions about the form of the target function while High-Variance suggests large changes to the estimate of the target function with changes to the training dataset. Generally, Decision Trees based algorithms, Support Vector Machines have high variance and low bias while logistic and linear regression have low variance and high bias. Some general ways to achieve the balance that we used through the process are:
+\begin{itemize}
+   \item High Variance Decrease:  Get more training examples from previous deleted rows; Try smaller sets of features; Try increasing the regularisation parameter $\alpha$ for LASSO and RIDGE regression
+   \item High Bias Decrease: Try additional features; Try adding polynomial features like $x_1^2, x_2^2, x_1 x_2$; Try decreasing the regularisation parameter $\alpha$ in LASSO and RIDGE regression
+Since 
+\end{itemize}
+
+\section{Data Preparation}
+\subsection{Data Source}
+Constructing the final dataset of SCA lawsuits proved to be a quite verbose procedure requesting mapping data from different sources. This section will articulate the sources, the cleaning process as well as the construction of dataset.
+Main actions adopted from the company are elaborated in the Table \hl{\label{manual}}. The principal source of data coming from the Hiscox which originated from Woodruff-Sawyer \& Co SCA Database. Some of the main features are SCA Category; different date such as Class Period Start Date and Settlement Date, market cap and financial ratio related features. For the full features, please see Table \hl{\ref{featuredictionary}}, \hl{\ref{sector}}, and \hl{\ref{other}}
+
+\subsection{Data Cleaning}
+There are originally 3039 rows. Excel is mainly applied for cleaning process which can be summarised as follows:
+\begin{enumerate}
+   \item Firstly, we only considered the cases that had a case status "Settled" or "Dismissed", resulting in the removal of 406 rows.
+   \item Secondly, 4 duplicates were deleted in case of modelling error(Duplicates)
+   \item Thirdly, those rows with missing values will be deleted or replaced 
+   \begin{itemize}
+     \item Drop 78 rows with lots of missing financial information 
+     \item Rows lack of IPO Price were randomly assign values from 20 to 40 
+     \item Delete 127 rows without allegation information 
+   \end{itemize}
+   \item Finally, check each feature with big outliers, replace them with the mean 
+\end{enumerate}
+Furthermore, there are a few features generated by original features which can be described below:
+ \begin{itemize}
+     \item Dependent Binary Variable (Settle or Dismiss) generated by Disposition 
+     \item 12 binary variables describing the category of SCA were combined to 1 category variable with number 1 to 12, see Appendix
+     \item Class Period Length were calculated by Class Period Start and End Date
+     \item Filing Period were days between Class Start Date and Suit Date
+     \item Filing Binary were decided by if Filing Period is 0 or not 
+     \item Number of Days to Settle, days between Suit Date and Settlement Date
+     \item Number of Days went Public, days between IPO Date and Suit Date
+     \item Dependent Binary Variable (Settle or Dismiss) generated by Disposition 
+     \item Percentage Decrease and Increase were mapped to variable New Percentage Decrease where negative value means percentage increase
+     \item Category variable Circuit was manually added derived from feature Court with US Circuit Map as reference, please see \href{http://www.uscourts.gov/about-federal-courts/federal-courts-public/court-website-links}{\colorbox{Graylight}{Court Website Links}}  
+     \item Variable Stock Exchange transformed to quantitative category feature
+     \item 29 binary features w.r.t. Allegation Type were mapped in the dataset using unique case ID for predictive modelling, see Appendix
+  \end{itemize}
+
+\subsection{Additional Sources}
+In addition to Hiscox data, we also considered S\&P 500 Return over the class period of each company using Yahoo! data which proved to be an important variable for prediction model later. If we define stock price percentage change as company return, then this new variable can act as a benchmark to compare. Start from S\&P 500 Index, we approximated index on weekends as the value of the previous day. Then we map the index separately to class start date and class end date for each company and finally calculated the corresponding return. \\
+\indent As some literature suggests that case notoriety might be important for predicting cash settlement amounts(Baker and Griffith 2009), it is worth trying to generate a numerical proxy of notoriety by manually via the Google News Archive. Therefore, the number of news restricted to one year before the filing date with company name plus key words "class action" as input was returned as a new predictor.
+
+\subsection{Data Exploration and Transformation}
+After all the processes described above, we prepared our base data set with 2051 cases for times series forecasting and modelling the probability of settlement. The database of 1170 cases will be used for predicting amount of total settlement. Thus the latter dataset is a subset of the former one. We then examined our binary response variable where there are 875 dismissed cases. If we plot the distribution of continuous variables such as Cash Settlement Amount and Market Cap, we can find that they are both highly right skewed. Since normality is assumed in linear regression, we transformed those non-negative variables by minimum value plus 1 and take natural logarithm(to guarantee non-negative values after taking the log). On the other hand, for those features with large negative values such as Net Worth, we simply used Z-Score method to standardise them. The transformation of dependent variable Cash Settlement Amount can be seen below:
+  \begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.3]{Marketcaptransform.png}
+  \caption{Market Cap Log Transformation}
+\end{figure}
+The normalisation is achieved for Cash Settlement Amount. After Transformation, we can take a look at statistics of main continuous features in the dataset by Box-and-Whisker Plot. Firstly, we can plot those non-negative continuous variables as follows:
+ \begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.33]{Positive.png}
+  \caption{Box and Whisker Plot of Positive Continuous Features}
+\end{figure}
+From the plot, we can observe 4 time period features, 6 financial features, 3 stock price features. They are separately distributed into three different measurements. In addition, it is evident that market value drop have some unusual outliers. On the other hand, Revenue, Assets, and Google Hits are in a quite large scope by contrast with stock price and period features. Next,  we plotted statistics of those features which have negative values. For a better comparison and convenience of modelling, we again transform these features via Z-Score normalisation. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.32]{Negative.png}
+  \caption{Box and Whisker Plot of Negative Continuous Features}
+\end{figure}
+From the above plot, we can see that all percentage variables except Insider Holding Percentage, Stock Price Percentage Decrease, and S\&P 500 Return distributed around 0 with lots of outliers which means they are badly right or left skewed. This may also suggest that they might not be good predictors in future linear modelling. 
+
+\section{Results Analysis: Settlement/Dismissal Model}
+\subsection{Feature Selection}
+There are in total 136 features after generating dummy variables from categorical predictors. About 50 features were first screened, finally around 30 features were selected. As continuous features tend to have less power on prediction for classification, we exclude variables StMarketcap and StOutstandingShares and keep Market Cap Band. \\
+\indent Firstly, the stepwise forward selection results from Stata were obtained. Some of the main features selected from the forward stepwise logistic regression are shown in the following table(for full results, please refer to Table \hl{\ref{stepwiselogistic}}). This will be our baseline for comparison with all the other feature selection methods. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{Stepwisemainfeatures.png}
+  \caption{Stepwise Forward Selection for Logistic Regression}
+\end{figure}
+Next, the Chi Square Test below show us the insight of categorical features' relationship to our binary target variable. It is evident that some of the allegation types involving Restatement of Earnings Misrepresentation Disclosure and Violation of GAAP have a larger influence on the decision of final status(settle/dismiss). Other category variables range from Sector Number to SCA Category also affect the response variable considerably. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.45]{ChiSquareTest.png}
+  \caption{Chi Square Test Rank}
+\end{figure}
+For comparison, we applied Random Forest algorithms to rank the feature importance as follows. Nevertheless, all continuous features seem to be overweight due to the sparsity of all the dummy variables. Dates related predictors such as class period length days are the most significant predictors. All direct financial features are more important than financial ratios since ratios are calculated from the latter variables. Furthermore, we can find that Accounting Improprieties rise a lot while Violation of GAAP and Restatement of Earnings remain the crucial positions. Finally, we can find that binary variables Circuit 2 and Circuit 9 are also in top 40 which proves again that the weightiness of cases in California and New York State like what has shown in the descriptive part. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.38]{RandomForestTest.png}
+  \caption{Random Forest Classifier Importance Rank}
+\end{figure}
+Afterwards, we compared selected features by wrapper methods Recursive Feature Elimination(RFE) and Sequential Forward Selection(SFS) with logistic regression as estimator and roc\_auc as scoring standard(4 fold cross validated score ). As we can see from the following two figures, SFS always works better than RFE mainly because it is optimised based on user-defined classifier performance metric. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.34]{SFSRFE.png}
+  \caption{SFS VS RFE by Number of Features(Classification Model)}
+\end{figure}
+We can also take a closer look of chosen features by the following table:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.32]{TableofFeatures.png}
+  \caption{Selected Features Comparison(Classification Model)}
+\end{figure}
+Just as expected, the RFE method with logistic regression as the estimator is not stable because of non-regularisation. We can utilise Ridge or Lasso for more stable results. Meanwhile, SFS seems to have captured the most of the important features presented by other methods which can be combined with our baseline features in the following classification models.
+\subsection{Settlement/Dismissal Baseline Model}
+With lots of combination of features tried based on features selection results, we built a well-performed baseline logistic regression model first with regularisation strength set to 0.5(where 1 means no regularisation). Since the logistic regression coefficients do not have strong intuition, they are converted to odds ratio and visualised as follows(for full results, please see Table \hl{\ref{Logit}}):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{Oddsratio.png}
+  \caption{Odds Ratios of Predictors}
+\end{figure}
+The odds of settling when Stock Option Backdating or Fail to Disclose Adverseness was triggered are separately about seven times and five times than those not. The settlement odds will rise 120\% when Number of Days to Settle/Dismiss increase 1 unit. More interestingly, when the case was filed before the class end date, the probability of settlement doubled. On the other hand, a larger number of market cap(without insider holding) and close stock price, a longer period the company since the company's IPO, and having no plaintiff listed tends to increase the likelihood of a dismissal. Furthermore, cases handled by Circuit 10 in Programming Service or Television sector are inclined to settle, while cases from Circuit 5 in Hotel and Leisure sector tend to dismiss. Combining the descriptive analysis before, we can conclude that the Second and Ninth Circuits do not have much power on the outcome of settlement or dismissal compared to Circuit five and ten despite the large fraction of cases. More intuitively, we can see the influence of features via following figures:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.32]{AllegatioType.png}
+  \caption{Allegation VS Predicted Probability}
+\end{figure}
+The probability tends to cluster at a higher value when Violation of GAAP and Restatement were triggered. Moreover, we explored the relationship between probability of settle with time to final settle/dismiss date. The scatter plot below tell us there is a distinct positive relationship between predicted chance of settle and time to settle.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.4]{Timetosettle.png}
+  \caption{Time to Settle VS Predicted Probability}
+\end{figure}
+Furthermore, the performance of logistic regression is not bad since the Pseudo R-square value reaches 0.247 which somehow suggests a good fitness of model(0.2 to 0.4 deemed as safe). Next, we plotted the density distribution of predictions and find that  the Logit model captures more settlement values than dismissal ones which is reasonable since the data is a little bit biased with more settled rows. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.41]{Distributionofpredictions.png}
+  \caption{Density Distribution of Predictions}
+\end{figure}
+Moreover, we further examined the confusion matrix of logistic regression as follows:
+\begin{table}[H]
+\caption{Logistic Regression Confusion Matrix}
+\centering
+\begin{tabular}{l|l|c|c|c}
+\multicolumn{2}{c}{}&\multicolumn{2}{c}{True diagnosis(Predicted)}&\\
+\cline{3-4}
+\multicolumn{2}{c|}{}&Positive&Negative&\multicolumn{1}{c}{Total}\\
+\cline{2-4}
+\multirow{2}{*}{Screening test(Actual)}& Positive & $780$ & $168$ & $948$\\
+\cline{2-4}
+& Negative & $269$ & $423$ & $692$\\
+\cline{2-4}
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{Total} & \multicolumn{1}{c}{$1049$} & \multicolumn{    1}{c}{$591$} & \multicolumn{1}{c}{$1640$}\\
+\end{tabular}
+\end{table}
+Derived from confusion matrix, we computed the following classification report:
+\begin{table}[H]
+  \centering
+  \caption{Logistic Regression Classification Report}
+    \begin{tabular}{rrrrr}
+    \rowcolor{gray}
+         & precision & recall & f1-score & support \\
+         \hline
+     0 & 0.72   & 0.61     & 0.66  & 692 \\
+     1 & 0.74     & 0.82   & 0.78    & 948 \\
+    avg/total & 0.73   & 0.73   & 0.73  & 1640 \\
+    \bottomrule
+    \end{tabular}
+  \label{tab:addlabel}
+\end{table}
+The classification report gives us the basic diagnoses of the logistic regression model. Around 73.5\% was correctly predicted in the sample which is not bad for infrequent events. Among 948 actual settled rows, there are 780 cases account for around 73.3\% were correctly predicted. Besides, there are 73.4\% are actually settled in 1049 predicted settled cases. Since precision and recall are equally important for us, thus the F score is simply the harmonic mean which is around 73.0\%. Furthermore, we can plot the Receiver Operating Characteristic Curve which shows the true positive rate vs the false positive resulting from different cutoffs in our predictive model. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.46]{ROCcurve.png}
+  \caption{Evaluation Metric Comparison of Different Algorithms}
+\end{figure}
+The curve climbs quite fast, and the area under the curve is around 0.72(better than the random model) which is good. Finally, the Matthews Correlation Coefficient between actual and predicted values is around 0.449 which indicates a strong positive relationship and good agreement. 
+
+ 
+\subsection{Settlement/Dismissal Model Selection and Evaluation}
+For our use case, there are no specific requirements of the cutoff(the number beyond which the prediction is considered positive). Thus we set all the algorithm threshold to default value 0.5. After applying Randomised Search Cross Validation for Decision Tree, Random Forest and SGD Classifier, we get the following 11 algorithms with corresponding evaluation metrics as contrast. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.32]{Metrics.png}
+  \caption{Evaluation Metrics Comparison of Different Algorithms}
+\end{figure}
+From the figure, we can find that hyper-parameter tuned algorithms always perform better than default ones with over 5\% enhancement through all evaluation methods. Moreover, Logistic Regression, Tuned SGD Classifier as well as Support Vector Machines are top three algorithms considering overall metric performance. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.29]{Trainingtime.png}
+  \caption{Evaluation Metrics Comparison of Different Algorithms}
+\end{figure}
+Take the Matthew Coefficients and Training Time into consideration, we can see Logistic Regression and Tuned SGD Classifier still show good results with extremely fast speed while Tuned Random Forest and supervised neural network model MLP Classifier take longer time. Finally, we choose Logistic Regression as our final model to deploy with the consideration that it not only ranks the best across all evaluation metrics but also get the best result with the fastest speed. Besides, it may reduce potential overfitting problem as it ordinarily achieves high bias and low variance. After fitting the training algorithm and apply it on the test set, we get slightly lower performance which is rational and intuitive as follows:
+\begin{table}[H]
+\caption{Test Performance}
+\centering
+\begin{tabular}{l|l|c|c|c}
+\multicolumn{2}{c}{}&\multicolumn{2}{c}{True diagnosis(Predicted)}&\\
+\cline{3-4}
+\multicolumn{2}{c|}{}&Positive&Negative&\multicolumn{1}{c}{Total}\\
+\cline{2-4}
+\multirow{2}{*}{Actual}& Positive & $184$ & $31$ & $215$\\
+\cline{2-4}
+& Negative & $88$ & $108$ & $196$\\
+\cline{2-4}
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{Total} & \multicolumn{1}{c}{$272$} & \multicolumn{    1}{c}{$139$} & \multicolumn{1}{c}{$411$}\\
+\end{tabular}
+    \begin{tabular}{rrrrr}
+         & precision & recall & f1-score & support \\
+         \hline
+     0 & 0.78   & 0.55     & 0.64  & 196 \\
+     1 & 0.68     & 0.86  & 0.76    & 215 \\
+    avg/total & 0.72   & 0.71   & 0.70  & 411 \\
+    \bottomrule
+    \end{tabular}
+\end{table}
+Among 411 Out-of-Sample data, there are still 71\% of accuracy, 72\% of precision, 71\% of recall and 70\% of F score where we can conclude the model predicts well with little degradation in evaluation performance on the out-of-sample cases. 
+
+
+\section{Results Analysis: Settlement Amount Model}
+\subsection{Feature Selection}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.38]{CorrelationCheckContinuous.png}
+  \caption{Correlation Matrix of Continuous Features}
+\end{figure}
+Since continuous variable always has more predictive power than category ones, we excluded the Market Cap Band and kept Market Cap to avoid strong correlation. Before formal feature selection, it is always secure to check the correlation matrix of the dataset. Therefore, we can take all the continuous variables as input to draw the above heat map. Except for Stock Price Decrease Percentage, S\&P 500 Return, PE Ratio and Profit to Net-worth, all the other features are positively correlated to Cash Settlement Amount. The matrix also tells us there is quite strong positive relationship within independent variables ranges from Market Cap to Net Worth. As a result, we can further remove Outstanding Shares and Stock Price Decrease Percentage to prevent endogeneity happening for future modelling. Next, a stepwise forward  linear regression was conducted with some of features displayed below(full results, see Table \hl{\ref{stepwiselinear}}):
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{stepwisemainfeature.png}
+  \caption{Stepwise Forward Selection for Linear Regression}
+\end{figure}
+These feature will be our standard where we can add more features from other feature selection methods. Next, we did a similar random forest rank of importance, and the top 35 significant ones are:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.34]{Randomforestcontinuous.png}
+  \caption{Random Forest Regressor Importance Rank}
+\end{figure}
+Random Forest Regressor now rank all direct financial features first this time following dates related ones, then financial ratios and all other category variables. Besides, Insider Trading Specifically, Merger Acquisition by Company and Products Failure Delay seems more significant for the settlement amount. Lastly, Sequential Forward Selection and Recursive Feature Elimination were again applied with R Square score as criteria. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.32]{SESRFEcontinuous.png}
+  \caption{SFS VS RFE by Number of Features(Regression Model)}
+\end{figure}
+Similarly to feature selection in classification model, the R Square score of SFS is always better than RFE on each number of features, and they separately converge to 0.56 and 0.52. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.32]{SFSRFEfeature.png}
+  \caption{Selected Features Comparison(Regression Model)}
+\end{figure}
+Moreover, both methods squint towards to chose continuous features which are consilient with the property of linear regression. Allegation Type related features were selected next w.r.t. predictive power, and finally dummy variables originated from category variables. Nevertheless, RFE chose those highly skewed features like PE Ratio and Profits. 
+\subsection{Settlement Amount Baseline Model}
+Based on stepwise forward linear regression, with the help of SFS, RFE, Random Forest and Correlation Matrix, we finally chose 24 features to put in the model. Firstly, we applied a simple linear regression with OLS estimator. The main results can be summarised in the following table and figure (for full results, please see Table \hl{\ref{ols}}):
+\begin{table} [H]
+\caption{Model Performance}
+\centering
+\begin{tabular}{lclc}
+\toprule
+\textbf{Omnibus:}       & 50.752 & \textbf{  R-squared:         } &     0.578   \\
+\textbf{Prob(Omnibus):} &  0.000         & \textbf{  Adj. R-squared:    } &     0.566   \\
+\textbf{Skew:}          & -0.443     & \textbf{  F-statistic:       } &     51.89   \\
+\textbf{Kurtosis:}      &  4.092   & \textbf{  Prob (F-statistic):} & 4.36e-152   \\
+\textbf{  Durbin-Watson:     } &    1.905       & \textbf{  Log-Likelihood:    } &   -929.62   \\
+ \textbf{  Jarque-Bera (JB):  } &   77.099        & \textbf{  AIC:               } &     1909.   \\
+ \textbf{  Prob(JB):          } & 1.81e-17        & \textbf{  BIC:               } &     2030.   \\
+\bottomrule
+\end{tabular}
+\end{table}
+Around 57.8\% variance of cash settlement amount was captured by the regression, and it was adjusted to 56.6\% when the degrees of freedom comes in. The p-value for F-statistic is close to 0 which means the results did not happen by chance. Log-Likelihood, AIC and BIC can be used for comparison after a new model being triained The residual is not skewed a lot which conforms to the statistical assumption of normality of the error. This can be further verified by the p-value(close to 0) from both Omnibus and Jarque-Bera tests. Besides, the Durbin-Watson test score (around 2) suggests there is no autocorrelation within residual which also means the model captured the patterns in the data quite well. Next, the weights and standard error for each feature were plotted:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.36]{Coefficientsofcontinuous.png}
+  \caption{Coefficients of Predictors}
+\end{figure}
+The coefficients values are quite plausible. For example, companies with higher market cap, asset, and Google hits are typically larger firms which are reasonable to undertake larger damage. More interestingly , those allegation variables like Insider Trading and Clinical Trial Failure which theoretically should only affect whether a case settled or dismissed, impact the settlement amounts at the same time. This indicates that the two response events may not be entirely independent. Moreover, the S\&P 500 market return positively impact settlement amounts even it is not relevant to a specific firm. In the end, we find that the cases happened in Real Estate(Sector 3) and Communications(Sector 10), listed on Nasdaq and filed in Circuit 4 are associated with lower settlements, whereas the settlement amount is higher when it takes place in Health Service(Sector 32) and Circuit 9. After the interpretation, we rerun the linear regression with 8-fold cross validation which resulted in a lower R Square. Then we inspected and diagnosed the regression residuals as follows: 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.31]{Redidualanalysis.png}
+  \caption{In-Sample Settlement Amount Model Fit and Residual Analysis}
+\end{figure}
+The predicted values distributed very near to actual values except for the lower-left tail part. In addition, positive and negative residuals are  pretty symmetrically distributed, tending to cluster towards the middle of the plot. Another healthy indicator is there is no clear patterns in the residual plots. 
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\thead{count} & \thead{mean} & \thead{std} & \thead{min} & \thead{25\%} & \thead{50\%} & \thead{75\%} & \thead{max}\\
+\hline 
+936.0000 & -0.0005& 0.6780 &--3.1425 & -0.4077 & 0.0185 &0.4612& 2.1492\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Error Distribution}
+\end{table}
+The table provides us with the information that the number of negative residuals is slightly more than positive ones. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.3]{QQ.png}
+  \caption{Error Distribution}
+\end{figure}
+The residual distribution and quantile-quantile plot tell us that there are a little bit more data located at the extremes(outliers) especially in the first quantile compared to the normal distribution. 
+
+\subsection{Settlement Amount Model Selection and Evaluation}
+Apart from OLS linear regression, Ridge and Lasso and Elastic Net regression were brought in where they also served as embedded feature selection methods. The following plot shows how weights change through all features with a different penalty.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.23]{LASSORIDGEpath.png}
+  \caption{Ridge and Lasso Coefficients as a Function of the Regularisation}
+\end{figure}
+Larger alpha will punish coefficients to zero. Alpha with value 0 will make the regression exactly the ordinary least squares regression. Therefore, we can apply these three linear model with iterative fitting along a regularisation path and finally choose the best model with 8-fold cross validation. The amount of penalisation chosen by cross validation for Ridge, Lasso and Elastic Net separately are 0.005, 0.0000253, and 0.0014(compromise value for Elastic Net set to 0.5). \\
+\indent Afterwards, we tried more advanced machine learning algorithms for contrast with the traditional statistical modelling including Gradient Boosting Regressor and XGBoost Regressor. Like what we did in classification model, we also tuned the hyper parameters for two regressor algorithms via randomised search. Now we can firstly evaluate different algorithms concerning R square and training time.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{Meanerror.png}
+  \caption{R Square and Training Time Comparison among Algorithms}
+\end{figure}
+From the above comparison, we can see that the statistical modelling work better than machine learning algorithms w.r..t. mean square error and mean absolute error. This might be the reason that underlying function is truly linear and there are linear combinations of our features. 
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.31]{Rsqaure.png}
+  \caption{Error Metrics Comparison among Algorithms}
+\end{figure}
+From the aspect of R Square, Lasso, Ridge and Elastic Net regression perform better than simple linear regression but with lower stability (higher standard deviation). On the other hand, simple linear regression takes the least time while Elastic Net take a way longer time to run because of the iterations for choosing the best parameters. Tuned algorithms also take a longer time than default ones. Finally, we chose Elastic Net as our final model to deploy as it is flexible to tune in the future with high stability. Last but not the least, we applied the trained algorithm on our out-of-sample test set to validate the real performance of the algorithm. The out-of-sample residual diagnosis can be seen below:
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.35]{Outofsampleresidual.png}
+  \caption{Out-of-Sample Settlement Amount Model Fit and Residual Analysis}
+\end{figure}
+
+\begin{table}[H]
+\begin{center}
+\caption{Evaluation Metrics on Test Data}
+\begin{tabular}{|c|c|c|}
+\hline
+\thead{Mean Squared Error} & \thead{Mean Absolute Error} & \thead{R Square} \\
+\hline 
+0.4759 & 0.5292 & 0.5391\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+\squeezeup
+Compared to previous training set residual performance, the model works the same for test set with a slight heavy tail. Most of the outliers now distribute at higher value area, yet the model still perform not bad(slightly lower) just as in the past which can also be verified by the evaluation scores. 
+
+
+
+

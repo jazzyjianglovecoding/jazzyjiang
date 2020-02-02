@@ -1,0 +1,1032 @@
+\section{Definitions}
+
+\begin{defn}[Weakly Stationarity]\label{Definition of Stationarity}
+A weekly stationary process can also be seen as a finite variance process which satisfy:
+ \begin{itemize}
+    \item Mean function is a constant as well as independent of t: $\mu_t=\mu$ 
+    \item Auto covariance function only depends on the difference between two time points: $\gamma(s,t)=\gamma(|t-s|,0)$  
+  \end{itemize}
+\end{defn}
+
+\begin{defn}[Augmented Dickey Fuller Test]\label{Definition of ADF}
+Also called Unit Root Test which is applied to the model: 
+\begin{equation}
+\Delta y_t=\alpha+\beta t+\gamma y_{t-1}+\cdots+\sigma_{p-1}\Delta y_{t-p-1}+\varepsilon_t
+\end{equation}
+where $\alpha$ is a constant and $\beta$ the coefficient on a time trend. p is the lag order of AR process, the unit root test can be articulated as: 
+\begin{align}
+H_0: \gamma=0 \textrm{(i.e. the data needs to be differenced to be stationary)}\nonumber
+\\ 
+H_1: \gamma<0 \textrm{(the data is stationary and  no need to be differenced)}\nonumber
+\end{align}
+The corresponding test statistics: $DF_{\tau}=\hat{\gamma}/SE(\hat{\gamma})$, if the test statistics is less than critical value, then we can reject the null hypothesis which means there is no unit root at corresponding confidence level.
+\end{defn}
+
+\begin{defn}[Autocorrelation and Partial Autocorrelation Function]\label{Definition of ACF and PACF}
+Autocorrelation can be interpreted as dependence of a variable with itself at two points in time. It only depends on the time lag $h$ for stationary process. If we define covariance between $y_t$ and $y_{t-h}$ as $\gamma(h)$, then autocorrelation function for lag $h$ is given by:
+\begin{equation}
+\rho_h=Corr(y_t,y_{y-h})=\frac{\gamma_h}{\gamma_0}
+\end{equation}
+where $\gamma_0$ can be seen as the unconditional variance of $y_t$. Partial autocorrelation is the autocorrelation after removing all the linear dependence on $y_1,y_2,\ldots,y_{t-h-1}$ which is always denoted as $\varphi_{h,h}$
+\end{defn}
+
+\begin{defn}[Autoregression Model]\label{Definition of AR(p)}
+A zero-mean stationary process is an Auto Regressive Process of Order p if it satisfies:
+\begin{equation}
+y_t=\phi_1y_{t-1}+\cdots+\phi_py_{t-p}+\varepsilon_t
+\end{equation}
+where $\varepsilon_t$ a Gaussian white noise with variance $\epsilon_t$
+\end{defn}
+
+\begin{defn}[Moving Average Model]\label{Definition of MA(q)}
+A process is a Moving Average Process of Order q if it satisfies:
+\begin{equation}
+y_t=\varepsilon_t+\theta_1\varepsilon_{t-1}+\cdots+\theta_1\varepsilon_{t-q}
+\end{equation}
+where $\varepsilon_t$ a independent Gaussian white noise with mean 0 and variance $\epsilon_t$
+\end{defn}
+
+\begin{defn}[Autoregressive Moving Average Process]\label{Definition of ARMA(p,q)}
+A zero-mean stationary process is a Autoregressive Moving Average Process of Orders p and q respectively if it satisfies:
+\begin{equation}
+y_t=\phi_1y_{t-1}+\cdots+\phi_py_{t-p}+\varepsilon_t+\theta_1\varepsilon_{t-1}+\cdots+\theta_1\varepsilon_{t-q}
+\end{equation}
+where $\varepsilon_t$ a independent Gaussian white noise with mean 0 and variance $\epsilon_t$
+\end{defn}
+
+\begin{defn}[Stepwise Forward Selection]\label{Definition of Stepwise Forward Selection}
+Forward selection is an iterative method which have the following steps:
+\begin{enumerate}
+   \item Start with no feature in the model
+   \item Check p-value for added features, choose the one with lowest p-value(less than set pr)
+   \item Continue adding features until the new variable dos not improve the model  
+\end{enumerate}
+The pr is always interpreted as p-value to remove. It is normally set to 5\%, yet it can extend to 20\% if prediction performance is our target. 
+\end{defn}
+
+\begin{defn}[Sequential Forward Selection]\label{Definition of Sequential Forward Selection}
+Denote $Y=\{y_1,\cdots,y_n\}$ the input feature matrix, $X_k =\{x_j|j=1,\cdots,k; x_j\in Y\}$ is returned selected features where $k<n$. Starting from the empty set, the process is:
+\begin{enumerate}
+   \item $x_{+}=arg max C(x_k+x)$ get the additional feature which maximises the chosen criteria function C
+   \item $X_k+1=X_k+x_{+}$, k=k+1
+   \item Repeat this procedure until the termination criterion k=p where p is number of desired features p specified as a priori 
+\end{enumerate}
+\end{defn}
+
+\begin{defn}[Recursive Feature Elimination ]\label{Definition of RFE}
+Let $Y=\{y_1,\cdots,y_n\}$ the input predictors matrix be, then the algorithm behind RFE can be enumerated as:
+\begin{enumerate}
+   \item Train the model on training dataset with all predictors and calculate model performance and variable importance;
+   \item for Each subset size $i,i\in n$, keep the i most significant features; train the training dataset via corresponding i predictors; calculate model performance again;
+   \item Choose the right number of predictors and use the model with corresponding optimal i. 
+\end{enumerate}
+\end{defn}
+
+\begin{defn}[Multiple Linear Regression]\label{Definition of Linear Regression}
+Let $Y = (y_1,\cdots ,y_n)$ be the response variable which take continuous values with size n, $X = (X_1,\cdots ,X_p)$ be the p chosen features, then we can write the following mathematical expression:
+\begin{equation}
+y_{i}=\beta_{0}+\beta_{1}x_{i,1}+\beta_{2}x_{i,2}+\ldots+\beta_{p-1}x_{i,p-1}+\epsilon_{i}.
+\end{equation}
+where i take integer from 1 to n, $\epsilon_{i}$  have a normal distribution with mean 0 and constant variance $\sigma^{2}$. The estimates of the coefficients $\beta$ are those values that minimise the sum of squared errors.
+\end{defn}
+
+\begin{defn}[Logistic Regression]\label{Definition of Logistic Regression}
+Binary Logistic Regression estimates the probability given the values of explanatory variables. Let Y be the response variable which take value 1 or 0, $X=(X_1,\cdots,X_n)$ be the chosen predictors. For a single explanatory variable, the model can be mathematically expressed as,
+\begin{equation}
+\pi_i=Pr(Y_i=1|X_i=x_i)=\dfrac{\text{exp}(\beta_0+\beta_1 x_i)}{1+\text{exp}(\beta_0+\beta_1 x_i)}
+\end{equation}
+Maximum Likelihood Estimator(MLE) was used for parameter estimation.
+\end{defn}
+
+\begin{defn}[Classification and Regression Tree]\label{Definition of Classification Tree}
+Classification and Regression Trees is introduced by Leo Breiman which act as a Decision Tree algorithms. Classification Trees is utilised for identifying the class a target variable belong while Regression Trees is used to predict a continuous target. The main elements in the algorithms are:
+\begin{itemize}
+   \item Rules for splitting data at a node; 
+   \item Stopping rules: determine the level of a branch, when it can not be split;
+   \item A prediction of target variable in each terminal point.
+\end{itemize}
+Gini Impurity is used as the measurement metric here for choosing best variables of splitting each step. 
+\end{defn}
+
+\begin{defn}[Bootstrap Aggregating]\label{Definition of Bagging}
+Also called bagging, invented by Leo Breiman which performs good along with algorithms that have high variance. Let N be the number of our observations with the binary response variable $Y$(either take 1 or 0), then the algorithm works as: 
+\begin{enumerate}
+   \item Take a bootstrap sample of size N from the dataset;
+   \item Build a classification tree without pruning and assign a class for each terminal node, save the class along with the predictor values of each observation;
+   \item Repeat step 1 and 2 lots of times;
+   \item For each observation, calculate the number of trees classified in one category;
+   \item Finally give a final category via a majority vote over the trees. For instance, an observation will be classified as 1 if 51\% of the time it is assigned to 1. 
+\end{enumerate}
+Gini Impurity is used as the measurement metric here for choosing best variables of splitting each step. 
+\end{defn}
+
+\begin{defn}[Gradient Boosting Machines]\label{Definition of Gradient Boosting}
+Originated from Leo Breiman and developed by Jerome H. Friedman, GBM can be interpreted as an optimisation algorithm on a cost function which consists of three elements:
+\begin{itemize}
+   \item A loss function to be optimised: logarithmic loss and squared error can be separately used for classification and regression;
+   \item A weak learner for predictions: Decision Trees elaborated before are used with specific constraints for weakness such as maximum number of layers, leaf nodes, and splits;
+   \item An extra model to add weak learners for minimising the loss function: gradient decent is always used by adding a tree to the model and modify the parameters of the trees (parameterised) to reduce the residual loss. Number of trees added can be decided by if the loss reaches an acceptable level. 
+   \end{itemize}
+\end{defn}
+
+\squeezeup
+\section{Main Python Code}
+Part of time series forecasting model code are listed below. For the full code, please see website: \href{https://github.com/jazzyjiang/ucldissertationcode}{\colorbox{Graylight}{<https://github.com/jazzyjiang/ucldissertationcode>.}}
+\begin{lstlisting}[language=Python]
+# summary statistics of time series
+print(series.describe())
+# plot times series data for overview
+pyplot.figure(1)
+series.plot()
+pylab.ylabel('Monthly Settled Cases')
+pylab.xlabel('Date')
+pyplot.show()
+# summary statistics of time series
+groups = series['1989':'2005'].groupby(TimeGrouper('A')) 
+years = DataFrame()
+for name, group in groups:
+  years[name.year] = group.values
+years.boxplot(return_type ='dict',figsize=(12,6))
+pyplot.show(4)
+# Dickey-Fuller statistical significance test for stationarity check
+X = series.values
+X = X.astype('float32')
+train_size = int(len(X) * 0.80)
+train, test = X[0:train_size], X[train_size:]
+result = adfuller(train)
+print('ADF Statistic: %f' % result[0]) 
+print('p-value: %f' % result[1])
+print('Critical Values:')
+for key, value in result[4].items():
+ print('\t%s: %.3f' % (key, value))  
+# Naive Forecast
+X = series.values
+X = X.astype('float32')
+train_size = int(len(X) * 0.80)
+train, test = X[0:train_size], X[train_size:]
+# walk-forward validation
+history = [x for x in train]
+predictions = list()
+for i in range(len(test)):
+	# predict
+	yhat = history[-1]
+	predictions.append(yhat)
+	# observation
+	obs = test[i]
+	history.append(obs)
+#	print('>Predicted=%.3f, Expected=%3.f' % (yhat, obs))
+# report performance
+rmse = sqrt(mean_squared_error(test, predictions))
+print('RMSE: %.3f' % rmse)
+mape= mean_absolute_percentage_error(test, predictions)
+print('MAPE: %.3f' % mape)
+# plot
+plt.figure(figsize=(10,6))
+plt.plot(test,label='test')
+plt.plot(predictions, color='green',linestyle='--',label='predictions')
+plt.legend(fontsize=14)
+plt.show()
+# Moving Average Forecast
+X = series.values
+train_size = int(len(X) * 0.80)
+train, test = X[0:train_size], X[train_size:]
+# train autoregression
+model = AR(train)
+model_fit = model.fit()
+window = model_fit.k_ar
+coef = model_fit.params
+# walk forward over time steps in test
+history = train[len(train)-window:]
+history = [history[i] for i in range(len(history))]
+predictions = list()
+for t in range(len(test)):
+	length = len(history)
+	lag = [history[i] for i in range(length-window,length)]
+	yhat = coef[0]
+	for d in range(window):
+		yhat += coef[d+1] * lag[window-d-1]
+	obs = test[t]
+	predictions.append(yhat)
+	history.append(obs)
+#	print('predicted=%f, expected=%f' % (yhat, obs))
+print('Lag: %s' % model_fit.k_ar)
+# report performance
+rmse = sqrt(mean_squared_error(test, predictions))
+print('RMSE: %.3f' % rmse)
+mape= mean_absolute_percentage_error(test, predictions)
+print('MAPE: %.3f' % mape)
+# plot
+plt.figure(figsize=(10,6))
+plt.plot(test,label='test')
+plt.plot(predictions, color='green',linestyle='--',label='predictions')
+plt.legend(fontsize=14)
+plt.show()
+# ARIMA model selection
+# evaluate an ARIMA model for a given order (p,d,q) and return RMSE
+def evaluate_arima_model(X, arima_order):
+	# prepare training dataset
+	X = X.astype('float32')
+	train_size = int(len(X) * 0.80)
+	train, test = X[0:train_size], X[train_size:]
+	history = [x for x in train]
+	# make predictions
+	predictions = list()
+	for t in range(len(test)):
+		model = ARIMA(history, order=arima_order)
+		model_fit = model.fit(trend='nc', disp=0)
+		yhat = model_fit.forecast()[0]
+		predictions.append(yhat)
+		history.append(test[t])
+	# calculate out of sample error
+	mse = mean_squared_error(test, predictions)
+	rmse = sqrt(mse)
+	return rmse
+# evaluate combinations of p, d and q values for an ARIMA model
+def evaluate_models(dataset, p_values, d_values, q_values):
+	dataset = dataset.astype('float32')
+	best_score, best_cfg = float("inf"), None
+	for p in p_values:
+		for d in d_values:
+			for q in q_values:
+				order = (p,d,q)
+				try:
+					rmse = evaluate_arima_model(dataset, order)
+					if rmse < best_score:
+						best_score, best_cfg = rmse, order
+					print('ARIMA%s RMSE=%.3f' % (order,rmse))
+				except:
+					continue
+	print('Best ARIMA%s RMSE=%.3f' % (best_cfg, best_score))
+# load dataset
+series = Series.from_csv('trainSet.csv')
+# evaluate parameters
+p_values = range(1, 5)
+d_values = range(0, 2)
+q_values = range(1, 5)
+warnings.filterwarnings("ignore")
+evaluate_models(series.values, p_values, d_values, q_values)
+# Run ARIMA(4,1,1) Model
+# prepare data
+X = series.values
+X = X.astype('float32')
+train_size = int(len(X) * 0.80)
+train, test = X[0:train_size], X[train_size:]
+# walk-forward validation
+history = [x for x in train]
+predictions = list()
+for i in range(len(test)):
+	model = ARIMA(history, order=(4,1,1)) #using manually selected paratments
+	model_fit = model.fit(disp=False, trend='c',transparams=False)
+	yhat = model_fit.forecast()[0]
+	predictions.append(yhat)
+	# observation
+	obs = test[i]
+	history.append(obs)
+#	print('>Predicted=%.3f, Expected=%3.f' % (yhat, obs))
+print(model_fit.summary())   
+# report performance
+rmse = sqrt(mean_squared_error(test, predictions))
+print('RMSE: %.3f' % rmse)
+mape= mean_absolute_percentage_error(test, predictions)
+print('MAPE: %.3f' % mape)
+# plot
+plt.figure(figsize=(10,6))
+plt.plot(test,label='test')
+plt.plot(predictions, color='green',linestyle='--',label='predictions')
+plt.legend(fontsize=14)
+plt.show()
+\end{lstlisting}
+
+\clearpage
+
+\squeezeup
+\section{Tables}
+\squeezeup
+
+\begin{table}[H]
+\footnotesize
+\caption{ARMA(1,0,1) Model Results}
+\label{ARIMA(1,0,1)}
+\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:} &            y             & \textbf{  No. Observations:  } &            276             \\
+\textbf{Model:}         &        ARMA(1, 1)        & \textbf{  Log Likelihood     } &          -232.125          \\
+\textbf{Method:}        &         css-mle          & \textbf{  S.D. of innovations} &           0.560            \\
+\textbf{Date:}          &     Wed, 16 Aug 2017     & \textbf{  AIC                } &          472.250           \\
+\textbf{Time:}          &         11:18:55         & \textbf{  BIC                } &          486.732           \\
+\textbf{Sample:}        &            0             & \textbf{  HQIC               } &          478.062           \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                 & \textbf{coef} & \textbf{std err} & \textbf{z} & \textbf{P$>$$|$z$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{const}   &       2.6661  &        0.221     &    12.078  &         0.000        &        2.233    &        3.099     \\
+\textbf{ar.L1.y} &       0.9826  &        0.015     &    64.798  &         0.000        &        0.953    &        1.012     \\
+\textbf{ma.L1.y} &      -0.8817  &        0.032     &   -27.678  &         0.000        &       -0.944    &       -0.819     \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\footnotesize
+\begin{center}
+\caption{Grid Search ARIMA Model Hyper-parameters Results}
+\label{ARIMAGrid}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\multicolumn{13}{|c|}{\thead{ARIMA(p,d,q) Parameter Setting and Corresponding RMSE}}\\
+\hline 
+p & 1 &1 &1 &1 &2 &2 &2 &3 &3 &3 &4 &4\\
+\hline
+d & 1 &1 &1 &1 &1 &1 &1 &1 &1 &1 &1 &1\\
+\hline
+q &1 &2 &3 &4 &1 &2 &4 &1 &2 &3 &1 &2\\
+\hline
+rmse &.56 &.57 &.57 &.555 &.56 &.56 &.56 &.555 &.556 &.58 &\cellcolor{blue!25}.554 &.555\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\begin{table}[H]
+\footnotesize
+\begin{center}
+\caption{ARIMA(4,1,1) Model Results}
+\label{ARIMA(4,1,1)}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:} &           D.y            & \textbf{  No. Observations:  } &            276             \\
+\textbf{Model:}         &      ARIMA(4, 1, 1)      & \textbf{  Log Likelihood     } &          -233.201          \\
+\textbf{Method:}        &         css-mle          & \textbf{  S.D. of innovations} &           0.562            \\
+\textbf{Date:}          &     Wed, 16 Aug 2017     & \textbf{  AIC                } &          480.402           \\
+\textbf{Time:}          &         18:41:40         & \textbf{  BIC                } &          505.745           \\
+\textbf{Sample:}        &            1             & \textbf{  HQIC               } &          490.572           \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                   & \textbf{coef} & \textbf{std err} & \textbf{z} & \textbf{P$>$$|$z$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{const}     &       0.0002  &        0.004     &     0.048  &         0.962        &       -0.008    &        0.008     \\
+\textbf{ar.L1.D.y} &      -0.0271  &        0.073     &    -0.370  &         0.712        &       -0.171    &        0.116     \\
+\textbf{ar.L2.D.y} &      -0.0206  &        0.068     &    -0.302  &         0.763        &       -0.154    &        0.113     \\
+\textbf{ar.L3.D.y} &      -0.1459  &        0.066     &    -2.201  &         0.029        &       -0.276    &       -0.016     \\
+\textbf{ar.L4.D.y} &      -0.0511  &        0.067     &    -0.759  &         0.449        &       -0.183    &        0.081     \\
+\textbf{ma.L1.D.y} &      -0.8590  &        0.043     &   -20.005  &         0.000        &       -0.943    &       -0.775     \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\begin{table}[H]
+\footnotesize
+\caption{Classification Evaluation Metrics}
+\label{binaryevaluate}
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\rowcolor{Graylight}
+Metric Name & Formula & Interpretation\\
+\hline
+Accuracy  & $\frac{\text{TP} + \text{TN}}{\text{total}}$ &Frequency the classifier correct\\
+\hline
+Error Rate & $\frac{\text{FP} + \text{FN}}{\text{total}} = 1 - \text{accuracy}$ & Frequency the classifier wrong\\
+\hline
+Precision & $\frac{\text{TP}}{\text{TP} + \text{FP}}$ &\makecell{What fraction of the predicted\\ positive actually are positive}\\
+\hline
+Recall & $\frac{\text{TP}}{\text{TP} + \text{FN}}$ & \makecell{What fraction of the actual\\ positive were identified} \\
+\hline
+Fall-out & $\frac{\text{FP}}{\text{TP} + \text{FN}}$ & \makecell{What fraction of the actual\\ positive not identified} \\
+\hline
+F-Score & $F_1 = 2 \frac{\text{precision} \times \text{recall}}{\text{precision} + \text{recall}}	$ & \makecell{Harmonic  mean\\ of the precision and recall} \\
+\hline
+MCC & $\frac{\text{TP}\times\text{TN}-\text{FP}\times\text{FN}}{\sqrt{(\text{TP} + \text{FP})(\text{TP} + \text{FN})(\text{TN} + \text{FP})(\text{TN} + \text{FN})}}$ & \makecell{ Geometric mean \\of the regression coefficients} \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\footnotesize
+\begin{center}
+\caption{Definitions Related to R Square}
+\label{Rsquare}
+\begin{tabular}{|c|c|c|}
+\hline
+\rowcolor{Graylight}
+Name & Formula & Interpretation\\
+\hline
+Regression Sum of Squares(SSR)  & $\sum_{i=1}^{n}(\hat{y}_i-\bar{y})^2$ &\makecell{How far the estimated \\sloped regression line}\\
+\hline
+Error Sum of Squares(SSE) & $\sum_{i=1}^{n}(y_i-\hat{y}_i)^2$ &\makecell{How much the data vary \\around the regression line}\\
+\hline
+Total Sum of Squares(SST) & $\sum_{i=1}^{n}(y_i-\bar{y})^2$ &\makecell{How much the data\\ vary around mean}\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\footnotesize
+\caption{Manual Adjustments}
+\label{manual}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\thead{General Adjustments} & \thead{Justification} \\
+\hline
+\makecell{Companies outside the\\ U.S are removed} & \makecell{The model will only be utilised for \\U.S. Incorporated Public companies}\\
+\hline
+\makecell{Claims not insurable or excluded\\ from D\&O Policy removed} & \makecell{The remained claims are \\more connected to D\&O claims}\\
+\hline
+\makecell{Companies traded on OTC removed } & \makecell{SCA dynamics are materially \\different for OTC traded companies}\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\begin{table}[H]
+\footnotesize
+\caption{Features Dictionary}
+\label{featuredictionary}
+\begin{center}
+\begin{tabular}{ | c  | c |}
+\hline
+\multicolumn{2}{|c|}{\thead{Feature Description}}\\
+\hline
+\rowcolor{Gray}
+Entity Name & Company named in lawsuit, not unique\\
+\hline
+Case Number & Lawsuit Case Number\\
+\hline
+\rowcolor{Gray}
+CUSIP & An acronym used to identify securities\\
+\hline
+SIC & Four-digit code used to classify industry\\
+\hline
+\rowcolor{Gray}
+Sector Number & Industry segments, details see appendix\\
+\hline
+SCA Description & Summary of the main reason of SCA\\
+\hline
+\rowcolor{Gray}
+SCA Category &Subjective 12 different categories by description\\
+\hline
+Different Date & \makecell{Class Period Start Date; Class Period End Date\\Suit Date; Settlement Date}\\
+\hline
+\rowcolor{Gray}
+Disposition & Status of SCA: Dismissed, Settled and Open\\
+\hline
+Cash Settlement Amount & Amount case settled for only for cases settled\\
+\hline
+\rowcolor{Gray}
+Market Cap & Market cap as of Date of Class Period Start Date\\
+\hline
+Market Cap Band & Grouped Market Cap into 12 bins\\
+\hline
+\rowcolor{Gray}
+Stock Price-Open & Stock Price as of Date of Class Period Start Date\\
+\hline
+Stock Price-3 Weeks Prior & 3 weeks prior to the Class Period End Date\\
+\hline
+\rowcolor{Gray}
+Stock Price-Close & Date of Class Period End Date plus one day\\
+\hline
+Shares Outstanding & Date of Class Period Start Date\\
+\hline
+\rowcolor{Gray}
+Pctg Increase, Decrease & Calculated by Stock Price\\
+\hline
+Market Value Drop & Woodruff coded this value from Bloomberg\\
+\hline
+\rowcolor{Gray}
+Insider Holding Percentage & \% held by insiders\\
+\hline
+MCap-No Insider Holdings & Market Cap excluded insider part\\
+\hline
+\rowcolor{Gray}
+Mkt Value Drop-No Insider & Market Value Drop excluded insider part\\
+\hline
+Financial Numbers & Revenue, Profits, Assets, Net Worth\\
+\hline
+\rowcolor{Gray}
+Finanical Ratios & \makecell{P/E Ratio, MCap to Net Worth, Profit to Revenue\\ Profit to Asset, Profit to Net Worth\\Derived from the Company Financial end Year\\ subsequent to the Class Period Start Date}\\
+\hline
+Court & Generally the state and location of court district\\
+\hline
+\rowcolor{Gray}
+Ticker & Ticker changes over time\\
+\hline
+Stock Exchange & AMEX, OTC BB, NYSE, NASDAQ, OTHERS\\
+\hline
+\rowcolor{Gray}
+Hdqtr State & US states where the company based \\
+\hline
+IPO Date, Price & Public company's IPO information\\
+\hline
+\rowcolor{Gray}
+Settlement Remarks & Settlement status description\\
+\hline
+Bankruptcy & If the company bankrupted or not\\
+\hline
+\rowcolor{Gray}
+Plaintiff Firm and Tier & Subjective judgement for Tier\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\footnotesize
+\centering
+\caption{Sector Numer Dictionary}
+\label{sector}
+\begin{tabular}{ll}
+Sector Number & Category                                \\
+1             & EMPTY                                   \\
+2             & INSURANCE                               \\
+3             & REAL ESTATE INV TRUSTS                  \\
+4             & EMPTY                                   \\
+5             & COMPUTER EQUIPMENT                      \\
+6             & MINING                                  \\
+7             & PHARMACEUTICAL PREPARATIONS             \\
+8             & OTHER CHEMICAL PRODUCTS                 \\
+9             & PETROLEUM REFINING                      \\
+10            & COMMUNICATIONS                          \\
+11            & TECHNICAL INSTRUMENTS                   \\
+12            & EMPTY                                   \\
+13            & FOOD \& DRINK                           \\
+14            & MOTOR VEHICLES                          \\
+15            & GENERAL MERCHANDISE                     \\
+16            & RESTAURANTS                             \\
+17            & UTILITIES                               \\
+18            & EMPTY                                   \\
+19            & AIRCRAFT \& BOAT PRODUCTION             \\
+20            & CIGARETTES AND CIGARS                   \\
+21            & INDUSTRIAL MACHINERY                    \\
+22            & TRANSPORTATION                          \\
+23            & CONSTRUCTION                            \\
+24            & GENERAL PRODUCTS                        \\
+25            & PUBLISHING                              \\
+26            & BUILDING MATERIALS                      \\
+27            & MISC TRANSPORT EQUIPMENT                \\
+28            & EMPTY                                   \\
+29            & REAL ESTATE                             \\
+30            & HOTEL AND LEISURE                       \\
+31            & CODE 7389 (RE-ALLOCATE)                 \\
+32            & HEALTH SERVICES                         \\
+33            & PROFESSIONAL SERVICES                   \\
+34            & EMPTY                                   \\
+35            & EMPTY                                   \\
+36            & EMPTY                                   \\
+37            & NATIONAL COMMERCIAL BANKS               \\
+38            & STATE COMMERCIAL BANKS                  \\
+39            & BANKS: ADVICE \& BROKERS                \\
+40            & BANKS: OTHER FINANCE SERVICES           \\
+41            & COMP SERV: PACKAGED SOFTWARE            \\
+42            & COMP SERV: PROGRAMMING ETC SERVICES     \\
+43            & TELEPHONE COMMUNICATIONS                \\
+44            & TELEVISION \& RADIO                     \\
+45            & SEMI-CONDUCTORS \& RELATED DEVICES      \\
+46            & OTHER ELEC (NON-COMP, NON SC) EQUIPMENT \\
+47            & VARIETY STORES                          \\
+48            & CLOTHING STORES                         \\
+49            & DRUG STORES                             \\
+50            & MISC STORES                             \\
+51            & EMPTY                                   \\
+52            & EMPTY                                   \\
+              &                                        
+\end{tabular}
+\end{table}
+\footnotesize
+\begin{table}[H]
+\footnotesize
+\centering
+\caption{Other Category Dictionary}
+\label{other}
+\begin{tabular}{ll}
+SCA Number     & Category                                                \\
+1(base)        & Sales manipulation/problems/revenue recognition         \\
+2              & Financial Restatement                                   \\
+3              & Misconduct financial misreporting /guidance             \\
+4              & Product/manufacturing Efficacy/quality                  \\
+5              & IPO Prospectus                                          \\
+6              & Professional Services Segment: Testing/Trials problems  \\
+7              & Drug/device efficacy/Labelling and 'off label' problems \\
+8              & FDA Approval Process: Phase I or II                     \\
+9              & FDA Approval Process: Phase III/NDA                     \\
+10             & Mining/Production problems                              \\
+11             & Standard bad customer loan problem                      \\
+12             & 'exotic' bad customer loan problem                      \\
+               &                                                         \\
+Stock Exchange & Category                                                \\
+1(base)        & New York Stock Exchange(NYSE)                           \\
+2              & NASDAQ                                                  \\
+3              & American Stock Exchange(AMEX)                           \\
+4              & Over The Counter Bulletin Board(OTCBB)                  \\
+5              & Other                                                   \\
+               &                                                         \\
+Plaintiff      & Category                                                \\
+0(base)        & Not Listed                                              \\
+1              & Tier 1                                                  \\
+2              & Tier 2                                                  \\
+3              & Tier 3                                                 
+\end{tabular}
+\end{table}
+
+\clearpage
+
+\begin{table}[H]
+\footnotesize
+\centering 
+\caption{Stepwise Logistic Regression Results}
+\label{stepwiselogistic}
+\begin{tabular}{l*{1}{c}} \hline\hline
+                    &\multicolumn{1}{c}{(1)}\\
+                    &\multicolumn{1}{c}{DependentVariableSettleDismis}\\
+\hline
+DependentVariableSettleDismis&            \\
+StNumberofDaystoDimissal&       0.924(12.95)\\
+                    
+StStockPriceClose   &      -0.518(-6.01)\\
+                
+RestatementofEarnings&       0.642(3.81)\\
+                    
+FalsePositivesFailtoDisclo&       1.582(5.88)\\
+                    
+\_ISCACatego\_3       &      -0.457(-3.64)\\
+                   
+StSP500ReturnDuringClassPeri&       0.285(4.52)\\
+                 
+StInsiderHoldingPercentage&       0.139(2.08)\\
+                   
+AccountingImproprietiesandIna&       0.519(4.32)\\
+                    
+FilingPeriod0       &       0.614(2.45)\\
+             
+Liquidity           &      -0.835(-1.89)\\
+                    
+StStockPriceOpen    &       0.422(4.25)\\
+                    
+\_IMarketCap\_9       &      -0.606(-2.85)\\
+                    
+StockOptionDating   &       1.522(3.28)\\
+                    
+\_ISector\_44         &       0.681(1.36)\\
+                    
+StMCapNoInsiderHoldings&      -0.297(-2.48)\\
+                   
+NormalisedNetWorth  &       0.2612.63)\\
+                  
+MergerAcquisitionbyCompany&       0.336(2.14)\\
+                 
+\_ISCACatego\_9       &      -0.340(-0.94)\\
+                   
+ProductsFailuresDelaysMis&       0.298(2.33)\\
+                 
+\_ISector\_42         &       0.4491.42)\\
+                    
+\_ICircuit\_5         &      -0.581 (-2.76)\\
+                    
+\_ICircuit\_8         &      -0.518(-1.88)\\
+                    
+\_ISector\_12         &      -0.755(-2.47)\\
+                   
+\_ISector\_15         &      -1.106(-2.36)\\
+                   
+\_ISector\_30         &      -0.971(-2.87)\\
+                    
+ViolationsofGAAP    &       0.225(1.56)\\
+                   
+StWithinDaysofIPODatewe&      -0.163(-2.33)\\
+                   
+\_IStockExch\_2       &      -0.348(-2.57)\\
+                    
+\_ICircuit\_10        &       0.584(1.87)\\\
+                    
+\_IMarketCap\_7       &      -0.353(-1.85)\\
+                    
+RegulatoryViolationsFDAFTC&       0.393(1.64)\\
+                  
+\_ISector\_19         &      -1.025(-2.02)\\
+                    
+\_IMarketCap\_3       &      -0.446(-1.95)\\
+                  
+\_ISCACatego\_6       &       2.080(1.66)\\
+                    
+\_ISCACatego\_7       &       1.033(1.78)\\
+                
+NormalisedProfittoRevenue&       0.183(2.16)\\
+                    
+StRevenue           &      -0.191(-1.88)\\
+                    
+\_ISector\_17         &      -0.683(-2.33)\\
+                
+\_ISector\_41         &      -0.538(-2.46)\\
+                  
+\_ICircuit\_11        &      -0.335(-1.78)\\
+                  
+\_IPlantiff\_3        &      -0.448(-1.18)\\
+                    
+TenderOffertoBuyBackShares&      -1.669(-1.69)\\
+                
+SpinoffDivesture    &      -1.266(-1.64)\\                                      
+                    
+\_IPlantiff\_1        &       0.612(1.85)\\
+                    
+\_ICircuit\_4         &      -0.387(-1.55)\\
+                                      
+StClassPeriodLengthdays&      0.0915(1.41)\\
+                                                                
+
+Constant            &       0.235(1.18)\\
+\hline
+Observations        &        2049\\
+\hline\hline
+\multicolumn{2}{l}{\footnotesize \textit{t} statistics in parentheses}\\
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering 
+\footnotesize
+\caption{Stepwise Linear Regression Results}
+\label{stepwiselinear}
+\begin{tabular}{l*{1}{c}} \hline\hline
+                    &\multicolumn{1}{c}{(1)}\\
+                    &\multicolumn{1}{c}{StCashSettlementAmount}\\
+\hline
+StMarketCap         &       0.500(10.57)\\
+
+StClassPeriodLengthDays&       0.145(6.48)\\
+
+StAssets            &      0.0619(1.55)\\
+
+InsiderTradingSpecificallyAll&       0.195(4.64)\\
+            
+FilingPeriod0       &       0.219(2.89)\\
+            
+ClinicalTrialFailuresDelays&       0.467(4.42)\\
+                
+SP500ReturnDuringClassPeri&       0.237 (3.01)\\
+        
+ViolationsofGAAP    &       0.1593.42)\\
+                
+NormalisedProfits   &      0.0684 (3.44)\\
+             
+StGoogleHits        &      0.0468(2.30)\\
+                    
+StockOptionDating   &       0.364 (2.84)\\\
+                 
+\_IStockExch\_2       &      -0.229(-4.28)\\
+               
+\_IStockExch\_4       &      -0.684(-3.72)\\
+               
+\_ISector\_10         &      -0.435 (-2.44)\\\
+                   
+\_ICircuit\_4         &      -0.228(-2.24)\\
+                  
+\_ISCACatego\_5       &       0.197 (3.11)\\
+           
+MisrepresentationDisclosure&      -0.148 (-2.41)\\
+               
+\_ISCACatego\_12      &       0.537(2.61)\\
+              
+StMktValueDropNoInsider&     -0.0501(-2.00)\\
+              
+\_ICircuit\_9         &       0.117(2.52)\\
+                
+\_ISector\_32         &       0.562(2.38)\\
+                
+\_IPlantiff\_1        &       0.216(1.56)\\
+                   
+\_ISector\_3          &      -0.380(-1.81)\\
+                
+\_ISCACatego\_2       &       0.1091.99)\\
+                    
+SpinoffDivesture    &       0.867(1.87)\\
+                  
+MergerAcquisitionbyOthersA&       0.299(1.95)\\
+                   
+\_ICircuit\_6         &       0.179(1.98)\\
+               
+\_ISector\_31         &       0.351(1.66)\\
+                   
+\_ISector\_6          &       0.462 (1.72)\\
+                   
+\_ISector\_20         &       0.286 (1.54)\\
+                    
+StStockPrice3weekprior&      0.0589(2.44)\\
+                
+\_ISCACatego\_8       &       0.440(1.88)\\
+                
+\_ISector\_41         &       0.111(1.41)\\
+            
+\_ISector\_4          &      -0.279(-1.63)\\
+                  
+\_IStockExch\_3       &      -0.223(-1.91)\\
+                 
+StOutstandingShares &      0.0721(1.75)\\
+                  
+\_ICircuit\_8         &       0.206 (1.80)\\
+                   
+\_ISCACatego\_10      &      -0.355(-1.60)\\
+                    
+\_ISector\_18         &      -0.702(-1.52)\\
+                   
+SarbanesOxley       &      -0.319(-1.92)\\
+                    
+\_IPlantiff\_2        &       0.189 (1.45)\\
+                 
+\_ISector\_23         &      -0.376(-1.51)\\
+                                  
+TenderOffertoBuyBackShares&      -0.603(-1.29)\\
+                  
+ImproperSettlementofLawsuit&       0.875(1.33)\\
+              
+BadManagementGeneralAllegat&       0.114(1.35)\\
+                   
+Constant            &      -0.174(-2.95)\\
+\hline
+Observations        &        1150\\
+\hline\hline
+\multicolumn{2}{l}{\footnotesize \textit{t} statistics in parentheses}\\
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\caption{Logit Regression Results}
+\label{Logit}
+\footnotesize
+\begin{center}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}                & DependentVariableSettleDismis & \textbf{  No. Observations:  } &     1640    \\
+\textbf{Model:}                        &             Logit             & \textbf{  Df Residuals:      } &     1599    \\
+\textbf{Method:}                       &              MLE              & \textbf{  Df Model:          } &       40    \\
+\textbf{Date:}                         &        Sun, 20 Aug 2017       & \textbf{  Pseudo R-squ.:     } &   0.2443    \\
+\textbf{Time:}                         &            23:24:57           & \textbf{  Log-Likelihood:    } &   -840.68   \\
+\textbf{converged:}                    &              True             & \textbf{  LL-Null:           } &   -1112.4   \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                                       & \textbf{coef} & \textbf{std err} & \textbf{z} & \textbf{P$>$$|$z$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}                     &       0.1159  &        0.207     &     0.559  &         0.576        &       -0.291    &        0.522     \\
+\textbf{StNumberofDaystoDimissal}      &       0.9265  &        0.078     &    11.911  &         0.000        &        0.774    &        1.079     \\
+\textbf{StWithinDaysofIPODatewe}       &      -0.1042  &        0.073     &    -1.432  &         0.152        &       -0.247    &        0.038     \\
+\textbf{StMCapNoInsiderHoldings}       &      -0.5093  &        0.119     &    -4.270  &         0.000        &       -0.743    &       -0.276     \\
+\textbf{NormalisedNetWorth}            &       0.3015  &        0.106     &     2.831  &         0.005        &        0.093    &        0.510     \\
+\textbf{StRevenue}                     &      -0.0509  &        0.098     &    -0.519  &         0.604        &       -0.243    &        0.141     \\
+\textbf{StStockPriceClose}             &      -0.5327  &        0.093     &    -5.712  &         0.000        &       -0.716    &       -0.350     \\
+\textbf{StStockPriceOpen}              &       0.4573  &        0.107     &     4.267  &         0.000        &        0.247    &        0.667     \\
+\textbf{StSP500ReturnDuringClassPeri}  &       0.2979  &        0.069     &     4.339  &         0.000        &        0.163    &        0.432     \\
+\textbf{StGoogleHits}                  &      -0.0947  &        0.062     &    -1.528  &         0.127        &       -0.216    &        0.027     \\
+\textbf{RestatementofEarnings}         &       0.7334  &        0.189     &     3.879  &         0.000        &        0.363    &        1.104     \\
+\textbf{ViolationsofGAAP}              &       0.2411  &        0.156     &     1.543  &         0.123        &       -0.065    &        0.547     \\
+\textbf{FalsePositivesFailtoDisclo}    &       1.3851  &        0.289     &     4.799  &         0.000        &        0.819    &        1.951     \\
+\textbf{AccountingImproprietiesandIna} &       0.4544  &        0.132     &     3.453  &         0.001        &        0.196    &        0.712     \\
+\textbf{FilingPeriod0}                 &       0.7553  &        0.283     &     2.666  &         0.008        &        0.200    &        1.311     \\
+\textbf{StockOptionDating}             &       1.6173  &        0.570     &     2.837  &         0.005        &        0.500    &        2.735     \\
+\textbf{MergerAcquisitionbyCompany}    &       0.1170  &        0.170     &     0.687  &         0.492        &       -0.217    &        0.451     \\
+\textbf{ProductsFailuresDelaysMis}     &       0.2195  &        0.140     &     1.570  &         0.116        &       -0.054    &        0.493     \\
+\textbf{Liquidity}                     &      -0.8715  &        0.454     &    -1.919  &         0.055        &       -1.761    &        0.019     \\
+\textbf{RegulatoryViolationsFDAFTC}    &       0.5282  &        0.270     &     1.957  &         0.050        &       -0.001    &        1.057     \\
+\textbf{\_ISCACatego\_3}               &      -0.4309  &        0.137     &    -3.141  &         0.002        &       -0.700    &       -0.162     \\
+\textbf{\_ISCACatego\_6}               &       2.0805  &        1.326     &     1.569  &         0.117        &       -0.519    &        4.680     \\
+\textbf{\_ISCACatego\_7}               &       1.0997  &        0.707     &     1.557  &         0.120        &       -0.285    &        2.484     \\
+\textbf{\_ISCACatego\_9}               &      -0.3465  &        0.394     &    -0.880  &         0.379        &       -1.118    &        0.425     \\
+\textbf{\_ISector\_44}                 &       1.0650  &        0.554     &     1.922  &         0.055        &       -0.021    &        2.151     \\
+\textbf{\_ISector\_42}                 &       0.6744  &        0.376     &     1.793  &         0.073        &       -0.063    &        1.411     \\
+\textbf{\_ISector\_12}                 &      -0.5368  &        0.341     &    -1.573  &         0.116        &       -1.206    &        0.132     \\
+\textbf{\_ISector\_37}                 &      -0.5104  &        0.457     &    -1.117  &         0.264        &       -1.406    &        0.385     \\
+\textbf{\_ISector\_18}                 &      -2.4248  &        1.324     &    -1.831  &         0.067        &       -5.021    &        0.171     \\
+\textbf{\_ISector\_30}                 &      -0.8009  &        0.378     &    -2.121  &         0.034        &       -1.541    &       -0.061     \\
+\textbf{\_ISector\_7}                  &      -0.4820  &        0.277     &    -1.741  &         0.082        &       -1.025    &        0.061     \\
+\textbf{\_IMarketCap\_3}               &      -0.4206  &        0.251     &    -1.677  &         0.094        &       -0.912    &        0.071     \\
+\textbf{\_IMarketCap\_7}               &      -0.1948  &        0.218     &    -0.893  &         0.372        &       -0.622    &        0.233     \\
+\textbf{\_IMarketCap\_9}               &      -0.4316  &        0.231     &    -1.869  &         0.062        &       -0.884    &        0.021     \\
+\textbf{\_ICircuit\_4}                 &      -0.4736  &        0.270     &    -1.752  &         0.080        &       -1.003    &        0.056     \\
+\textbf{\_ICircuit\_5}                 &      -0.6128  &        0.229     &    -2.675  &         0.007        &       -1.062    &       -0.164     \\
+\textbf{\_ICircuit\_8}                 &      -0.3403  &        0.309     &    -1.103  &         0.270        &       -0.945    &        0.265     \\
+\textbf{\_ICircuit\_10}                &       0.2971  &        0.316     &     0.939  &         0.348        &       -0.323    &        0.917     \\
+\textbf{\_IPlantiff\_3}                &      -0.6987  &        0.428     &    -1.633  &         0.102        &       -1.537    &        0.140     \\
+\textbf{\_IStockExch\_2}               &      -0.2962  &        0.147     &    -2.012  &         0.044        &       -0.585    &       -0.008     \\
+\textbf{\_IUSIPOCate\_3}               &       0.1956  &        0.135     &     1.452  &         0.147        &       -0.068    &        0.460     \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[H]
+\footnotesize
+\begin{center}
+\caption{OLS Linear Regression Results}
+\label{ols}
+\begin{tabular}{lclc}
+\toprule
+\textbf{Dep. Variable:}                & StCashSettlementAmount & \textbf{  R-squared:         } &     0.578   \\
+\textbf{Model:}                        &          OLS           & \textbf{  Adj. R-squared:    } &     0.566   \\
+\textbf{Method:}                       &     Least Squares      & \textbf{  F-statistic:       } &     51.89   \\
+\textbf{Date:}                         &    Tue, 20 Aug 2017    & \textbf{  Prob (F-statistic):} & 4.36e-152   \\
+\textbf{Time:}                         &        10:11:40        & \textbf{  Log-Likelihood:    } &   -929.62   \\
+\textbf{No. Observations:}             &            936         & \textbf{  AIC:               } &     1909.   \\
+\textbf{Df Residuals:}                 &            911         & \textbf{  BIC:               } &     2030.   \\
+\textbf{Df Model:}                     &             24         & \textbf{                     } &             \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lcccccc}
+                                       & \textbf{coef} & \textbf{std err} & \textbf{t} & \textbf{P$>$$|$t$|$} & \textbf{[0.025} & \textbf{0.975]}  \\
+\midrule
+\textbf{Intercept}                     &      -0.0990  &        0.056     &    -1.776  &         0.076        &       -0.208    &        0.010     \\
+\textbf{StMarketCap}                   &       0.5399  &        0.042     &    12.798  &         0.000        &        0.457    &        0.623     \\
+\textbf{StClassPeriodLengthDays}       &       0.1379  &        0.025     &     5.493  &         0.000        &        0.089    &        0.187     \\
+\textbf{StAssets}                      &       0.1205  &        0.042     &     2.884  &         0.004        &        0.039    &        0.203     \\
+\textbf{SP500ReturnDuringClassPeri}    &       0.1951  &        0.091     &     2.136  &         0.033        &        0.016    &        0.374     \\
+\textbf{StMktValueDropNoInsider}       &      -0.0542  &        0.027     &    -2.005  &         0.045        &       -0.107    &       -0.001     \\
+\textbf{StGoogleHits}                  &       0.0694  &        0.023     &     3.076  &         0.002        &        0.025    &        0.114     \\
+\textbf{NormalisedProfits}             &       0.0659  &        0.020     &     3.255  &         0.001        &        0.026    &        0.106     \\
+\textbf{StStockPrice3weekprior}        &       0.0378  &        0.025     &     1.495  &         0.135        &       -0.012    &        0.087     \\
+\textbf{InsiderTradingSpecificallyAll} &       0.1586  &        0.047     &     3.362  &         0.001        &        0.066    &        0.251     \\
+\textbf{FilingPeriod0}                 &       0.1679  &        0.087     &     1.932  &         0.054        &       -0.003    &        0.338     \\
+\textbf{ClinicalTrialFailuresDelays}   &       0.3849  &        0.100     &     3.831  &         0.000        &        0.188    &        0.582     \\
+\textbf{ViolationsofGAAP}              &       0.1669  &        0.052     &     3.230  &         0.001        &        0.066    &        0.268     \\
+\textbf{StockOptionDating}             &       0.3534  &        0.136     &     2.591  &         0.010        &        0.086    &        0.621     \\
+\textbf{MisrepresentationDisclosure}   &      -0.1368  &        0.068     &    -2.004  &         0.045        &       -0.271    &       -0.003     \\
+\textbf{\_ISector\_3}                  &      -0.4293  &        0.213     &    -2.014  &         0.044        &       -0.848    &       -0.011     \\
+\textbf{\_ISector\_10}                 &      -0.4513  &        0.225     &    -2.003  &         0.045        &       -0.893    &       -0.009     \\
+\textbf{\_ISector\_31}                 &       0.4285  &        0.241     &     1.779  &         0.076        &       -0.044    &        0.901     \\
+\textbf{\_ISector\_32}                 &       0.3188  &        0.259     &     1.232  &         0.218        &       -0.189    &        0.827     \\
+\textbf{\_IStockExch\_2}               &      -0.1916  &        0.054     &    -3.541  &         0.000        &       -0.298    &       -0.085     \\
+\textbf{\_IStockExch\_4}               &      -0.5821  &        0.189     &    -3.074  &         0.002        &       -0.954    &       -0.210     \\
+\textbf{\_ICircuit\_9}                 &       0.0703  &        0.049     &     1.433  &         0.152        &       -0.026    &        0.167     \\
+\textbf{\_ICircuit\_4}                 &      -0.1877  &        0.117     &    -1.609  &         0.108        &       -0.417    &        0.041     \\
+\textbf{\_ISCACatego\_2}               &       0.0839  &        0.061     &     1.373  &         0.170        &       -0.036    &        0.204     \\
+\textbf{\_ISCACatego\_5}               &       0.1550  &        0.071     &     2.197  &         0.028        &        0.017    &        0.294     \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lclc}
+\textbf{Omnibus:}       & 50.752 & \textbf{  Durbin-Watson:     } &    1.905  \\
+\textbf{Prob(Omnibus):} &  0.000 & \textbf{  Jarque-Bera (JB):  } &   77.099  \\
+\textbf{Skew:}          & -0.443 & \textbf{  Prob(JB):          } & 1.81e-17  \\
+\textbf{Kurtosis:}      &  4.092 & \textbf{  Cond. No.          } &     20.1  \\
+\bottomrule
+\end{tabular}
+%\caption{OLS Regression Results}
+\end{center}\end{table}
+
+\clearpage
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{Evaluation Comparison Matrix for Two Prediction Models }
+\begin{tabular}{lllll}
+Algorithms                  & Accuracy             & Precision      & Recall        & F1 Score      \\
+Logistic Regession          & 0.7349               & 0.7331         & 0.7347        & 0.7309        \\
+Decision Tree(Default)      & 0.6451               & 0.6433         & 0.6439        & 0.6436        \\
+Decision Tree(Tuned)        & 0.6879               & 0.6848         & 0.6878        & 0.685         \\
+Random Forest               & 0.6658               & 0.6997         & 0.6987        & 0.6992        \\
+Random Forest(Tuned)        & 0.728                & 0.7281         & 0.728         & 0.7212        \\
+SGD Classifier              & 0.6579               & 0.6423         & 0.6451        & 0.6432        \\
+SGD Classifier(Tuned)       & 0.7397               & 0.7322         & 0.7341        & 0.7317        \\
+XGB Classifier              & 0.733                & 0.7324         & 0.7329        & 0.7272        \\
+GBC                         & 0.7251               & 0.7258         & 0.7262        & 0.72          \\
+SVM                         & 0.7354               & 0.7373         & 0.7354        & 0.7275        \\
+MLP Classifier              & 0.733                & 0.7122         & 0.7146        & 0.7121        \\
+                            & Matthew & Hamming Loss   & ROC-AUC  & Training Time \\
+Logistic Regession          & 0.449                & 0.2652         & 0.718         & 0.00006       \\
+Decision Tree(Default)      & 0.2689               & 0.3561         & 0.6342        & 0.0007        \\
+Decision Tree(Tuned)        & 0.3525               & 0.3122         & 0.6732        & 0.0001        \\
+Random Forest               & 0.3845               & 0.3012         & 0.6928        & 0.00093       \\
+Random Forest(Tuned)        & 0.4338               & 0.2719         & 0.7062        & 20            \\
+SGD Classifier              & 0.2664               & 0.3549         & 0.6317        & 0.00006       \\
+SGD Classifier(Tuned)       & 0.4491               & 0.2744         & 0.7049        & 0.00009       \\
+XGB Classifier              & 0.4444               & 0.2671         & 0.7128        & 0.0001        \\
+GBC                         & 0.4299               & 0.2737         & 0.7054        & 7             \\
+SVM                         & 0.4499               & 0.2646         & 0.712         & 5             \\
+MLP Classifier              & 0.4085               & 0.2853         & 0.7007        & 28            \\
+                            &                      &                &               &               \\
+Algorithms                  & MSE                  & MSE(StDev)     & MAE           & MAE(StDev)    \\
+Linear Regession            & 0.4529               & 0.1336         & 0.5179        & 0.0599        \\
+Cross Validated Ridge       & 0.4528               & 0.1344         & 0.5177        & 0.0602        \\
+Cross Validated Lasso       & 0.4518               & 0.1395         & 0.5168        & 0.0634        \\
+Cross Validated Elastic Net & 0.4526               & 0.1399         & 0.5175        & 0.0653        \\
+GBR(Default)                & 0.4891               & 0.196          & 0.5371        & 0.1071        \\
+GBR(Tuned)                  & 0.4867               & 0.1918         & 0.5345        & 0.0924        \\
+XGBoost Regressor(Default)  & 0.4904               & 0.1931         & 0.5378        & 0.0998        \\
+XGBoost Regressor(Tuned)    & 0.4872               & 0.1875         & 0.534         & 0.0922        \\
+                            & MediaAE              & MediaAE(StDev) & R Square      & Training Time \\
+Linear Regession            & 0.4329               & 0.0843         & 0.5413        & 0.53          \\
+Cross Validated Ridge       & 0.4307               & 0.0828         & 0.5427        & 5.07          \\
+Cross Validated Lasso       & 0.4275               & 0.0763         & 0.5439        & 5.19          \\
+Cross Validated Elastic Net & 0.4356               & 0.0872         & 0.5433        & 12.2          \\
+GBR(Default)                & 0.4433               & 0.1318         & 0.5101        & 8.45          \\
+GBR(Tuned)                  & 0.4313               & 0.1057         & 0.5135        & 10.3          \\
+XGBoost Regressor(Default)  & 0.4355               & 0.1065         & 0.5078        & 6.43          \\
+XGBoost Regressor(Tuned)    & 0.4243               & 0.1149         & 0.5118        & 9.87         
+\end{tabular}\end{table}
